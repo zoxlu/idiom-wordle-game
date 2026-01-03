@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>成語猜謎遊戲 - 手機版</title>
+  <style>
+    :root {
+      --bg-color: #020617;
+      --board-bg: #020617;
+      --tile-border: #e0e0e0;
+      --tile-empty-bg: #020617;
+      --tile-correct: #16a34a;
+      --tile-present: #eab308;
+      --tile-absent: #4b5563;
+      --text-main: #f9fafb;
+      --accent: #fb923c;
+      --transition-fast: 0.15s ease-out;
+      --tile-size: 64px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at top, #1f2933, #020617 60%);
+      color: var(--text-main);
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .game-shell {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      background: #020617;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .top-bar {
+      padding: 10px 14px 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .title-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .title {
+      font-size: 18px;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: #cbd5f5;
+      margin-top: 2px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .btn {
+      padding: 8px 12px;
+      font-size: 12px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+      box-shadow: none;
+    }
+
+    .btn[disabled] {
+      opacity: 0.6;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-primary {
+      background: #f97316;
+      border-color: #ea580c;
+      color: white;
+      padding: 9px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 0 0 1px rgba(248, 150, 69, 0.6), 0 0 16px rgba(248, 113, 22, 0.8);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: #4b5563;
+      color: #e5e7eb;
+      padding-inline: 10px;
+    }
+
+    .btn-small {
+      padding: 6px 10px;
+      font-size: 11px;
+    }
+
+    .btn-wide {
+      min-width: 140px;
+      justify-content: center;
+    }
+
+    .btn-undo-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .main-panel {
+      flex: 1;
+      padding: 10px 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .board-wrapper {
+      background: var(--board-bg);
+      border-radius: 16px;
+      padding: 12px 10px 14px;
+      border: 1px solid #1f2937;
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.85);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      font-size: 12px;
+      color: #e5e7eb;
+    }
+
+    .status-text {
+      min-height: 16px;
+    }
+
+    .status-text strong {
+      color: #facc15;
+    }
+
+    .attempts {
+      font-variant-numeric: tabular-nums;
+      font-size: 13px;
+      font-weight: 600;
+      color: #f97316;
+    }
+
+    .info-row-secondary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #e5e7eb;
+    }
+
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: #0b1220;
+      border: 1px solid #4b5563;
+      font-size: 12px;
+      color: #e5e7eb;
+    }
+
+    .level-progress {
+      font-size: 12px;
+      color: #e5e7eb;
+    }
+
+    .level-progress strong {
+      font-size: 14px;
+      color: #fbbf24;
+    }
+
+    .board {
+      display: grid;
+      grid-template-rows: repeat(4, var(--tile-size));
+      grid-template-columns: repeat(4, var(--tile-size));
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .tile {
+      width: var(--tile-size);
+      height: var(--tile-size);
+      border-radius: 10px;
+      border: 2px solid var(--tile-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 700;
+      background: var(--tile-empty-bg);
+      color: var(--text-main);
+      text-align: center;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+      transition: background 0.18s ease-out, border-color 0.18s ease-out, transform 0.08s ease-out;
+    }
+
+    .tile.filled {
+      border-color: var(--accent);
+    }
+
+    .tile.correct {
+      background: var(--tile-correct);
+      border-color: var(--tile-correct);
+      transform: scale(1.03);
+    }
+
+    .tile.present {
+      background: var(--tile-present);
+      border-color: var(--tile-present);
+      transform: scale(1.03);
+    }
+
+    .tile.absent {
+      background: var(--tile-absent);
+      border-color: var(--tile-absent);
+      color: #e5e7eb;
+    }
+
+    .tile.shake {
+      animation: shake 0.22s ease-in-out;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+      75% { transform: translateX(-3px); }
+      100% { transform: translateX(0); }
+    }
+
+    .pool-wrapper {
+      margin-top: 6px;
+      padding-top: 8px;
+      border-top: 1px dashed #334155;
+    }
+
+    .pool-title {
+      font-size: 12px;
+      margin-bottom: 6px;
+      color: #e5e7eb;
+    }
+
+    .char-pool {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px 12px;
+      justify-content: center;
+    }
+
+    .char-btn {
+      padding: 8px 0;
+      border-radius: 10px;
+      border: 1px solid #9ca3af;
+      background: radial-gradient(circle at top, #0f172a, #020617 70%);
+      color: #f9fafb;
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
+      user-select: none;
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .char-btn:active {
+      transform: scale(0.96);
+      box-shadow: none;
+    }
+
+    .char-btn.used {
+      background: #4b5563;
+      border-color: #6b7280;
+      color: #9ca3af;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .char-btn.absent-global {
+      background: #020617;
+      border-color: #4b5563;
+      color: #6b7280;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+      pointer-events: none;
+    }
+
+    .char-btn.disabled {
+      pointer-events: none;
+      opacity: 0.4;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .controls-left {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex: 1;
+    }
+
+    .controls-right {
+      display: flex;
+      justify-content: flex-end;
+      flex: 1;
+    }
+
+    .center-message {
+      text-align: center;
+      font-size: 20px;
+      font-weight: 900;
+      color: #f97316;
+      margin-top: 6px;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+      pointer-events: none;
+    }
+
+    .center-message.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.96);
+      color: #e5e7eb;
+      border: 1px solid #4b5563;
+      font-size: 12px;
+      z-index: 40;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 2px);
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 30;
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: #020617;
+      border-radius: 16px;
+      padding: 18px 16px 14px;
+      border: 1px solid #1f2937;
+      max-width: 340px;
+      width: 92%;
+      text-align: left;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.85);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .modal-body {
+      font-size: 13px;
+      margin-bottom: 10px;
+      color: #e5e7eb;
+      line-height: 1.7;
+    }
+
+    .modal-body ul {
+      padding-left: 18px;
+      margin-top: 4px;
+    }
+
+    .modal-body li + li {
+      margin-top: 3px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .highlight-correct { color: #4ade80; font-weight: 600; }
+    .highlight-present { color: #facc15; font-weight: 600; }
+
+    @media (max-width: 400px) {
+      :root {
+        --tile-size: 56px;
+      }
+      .title { font-size: 16px; }
+      .char-btn { font-size: 20px; min-height: 52px; }
+      .main-panel { padding-inline: 8px; }
+    }
+
+    @media (max-height: 640px) {
+      .board-wrapper {
+        padding-block: 10px;
+      }
+      .pool-wrapper {
+        margin-top: 4px;
+      }
+      .char-btn {
+        min-height: 50px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toast" id="toast"></div>
+
+  <!-- 結束遊戲彈窗（沿用原結束邏輯） -->
+  <div class="overlay" id="end-overlay">
+    <div class="modal">
+      <div class="modal-title" id="end-title"></div>
+      <div class="modal-body" id="end-body"></div>
+      <div class="modal-actions">
+        <button class="btn btn-primary btn-wide" id="btn-retry">再玩一次</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 開場說明彈窗（左側內容搬移） -->
+  <div class="overlay show" id="start-overlay">
+    <div class="modal">
+      <div class="modal-title">成語猜謎</div>
+      <div class="modal-body">
+        <p>四字成語版 Wordle，適合在手機上動動腦的猜成語小遊戲。</p>
+        <ul>
+          <li>從下方 16 個字中選出 <strong>4 個</strong>，依序填入上方空格後按「送出答案」。</li>
+          <li><span class="highlight-correct">綠色</span>：字和<strong>位置</strong>都正確；<span class="highlight-present">土黃色</span>：字在成語中但<strong>位置不對</strong>；灰色：不在答案中。</li>
+        </ul>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-small" id="btn-start-rules">先看規則</button>
+        <button class="btn btn-primary btn-wide" id="btn-start-game">開始遊戲</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 遊戲規則彈窗（可隨時開啟） -->
+  <div class="overlay" id="rules-overlay">
+    <div class="modal">
+      <div class="modal-title">遊戲規則</div>
+      <div class="modal-body">
+        <p>每一題的目標是猜出一個四字成語：</p>
+        <ul>
+          <li>從畫面下方 16 個字中選出 <strong>4 個</strong>，依順序填進上方 4 個格子。</li>
+          <li>填滿後按「送出答案」，系統會用顏色給你提示。</li>
+          <li><span class="highlight-correct">綠色</span>：字和<strong>位置</strong>都正確。</li>
+          <li><span class="highlight-present">土黃色</span>：字有出現在答案中，但<strong>位置不對</strong>。</li>
+          <li>灰色：這個字沒有出現在答案中。</li>
+        </ul>
+        <p style="margin-top:6px;">連續答對多題可以升級，挑戰更困難的成語！</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-wide" id="btn-close-rules">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="game-shell">
+    <header class="top-bar">
+      <div class="title-group">
+        <div class="title">成語猜謎</div>
+        <div class="subtitle">四字成語版 Wordle</div>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-small btn-ghost" id="btn-open-rules">遊戲規則</button>
+      </div>
+    </header>
+
+    <main class="main-panel">
+      <section class="board-wrapper" id="board-wrapper">
+        <div class="info-row">
+          <div class="status-text" id="status-text"></div>
+          <div class="attempts" id="attempts-text"></div>
+        </div>
+
+        <div class="info-row-secondary">
+          <div>
+            等級：
+            <span class="level-badge" id="level-badge">小學生</span>
+          </div>
+          <div class="level-progress">本級已答對 <strong id="level-correct">0</strong> / 5 題</div>
+        </div>
+
+        <div class="board" id="board"></div>
+        <div class="center-message" id="center-message">正確答案！點擊「下一題」繼續</div>
+
+        <div class="pool-wrapper">
+          <div class="pool-title">請用手指點選下方文字，依順序填入上方空格：</div>
+          <div class="char-pool" id="char-pool"></div>
+        </div>
+
+        <div class="controls">
+          <div class="controls-left">
+            <button class="btn btn-small btn-ghost" id="btn-undo"><span class="btn-undo-icon">⌫</span> 倒退一格</button>
+          </div>
+          <div class="controls-right">
+            <button class="btn btn-primary" id="btn-submit">送出答案</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const LEVELS = [
+      { key: 'elementary', name: '小學生' },
+      { key: 'general', name: '普羅大眾' },
+      { key: 'teacher', name: '國文老師' },
+      { key: 'professor', name: '中文系教授' }
+    ];
+
+    const ROWS = 4;
+    const COLS = 4;
+
+    const boardEl = document.getElementById('board');
+    const poolEl = document.getElementById('char-pool');
+    const statusTextEl = document.getElementById('status-text');
+    const attemptsTextEl = document.getElementById('attempts-text');
+    const toastEl = document.getElementById('toast');
+    const levelBadgeEl = document.getElementById('level-badge');
+    const levelCorrectEl = document.getElementById('level-correct');
+    const endOverlayEl = document.getElementById('end-overlay');
+    const endTitleEl = document.getElementById('end-title');
+    const endBodyEl = document.getElementById('end-body');
+    const boardWrapperEl = document.getElementById('board-wrapper');
+    const centerMessageEl = document.getElementById('center-message');
+
+    const startOverlayEl = document.getElementById('start-overlay');
+    const rulesOverlayEl = document.getElementById('rules-overlay');
+    const btnStartGame = document.getElementById('btn-start-game');
+    const btnStartRules = document.getElementById('btn-start-rules');
+    const btnOpenRules = document.getElementById('btn-open-rules');
+    const btnCloseRules = document.getElementById('btn-close-rules');
+
+    const btnSubmit = document.getElementById('btn-submit');
+    const btnUndo = document.getElementById('btn-undo');
+    const btnRetry = document.getElementById('btn-retry');
+
+    let ALL_CHARS = '';
+    let idiomData = null;
+
+    let answer = '';
+    let currentRow = 0;
+    let currentCol = 0;
+    let boardState = [];
+    let gameOver = false;
+    let waitingForClickToContinue = false;
+
+    let currentLevelIndex = 0;
+    let levelCorrectCount = 0;
+    let solvedIdioms = [];
+
+    function showToast(msg, duration = 1500) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => {
+        toastEl.classList.remove('show');
+      }, duration);
+    }
+
+    function openEndOverlay(title, body) {
+      endTitleEl.textContent = title;
+      endBodyEl.textContent = body;
+      endOverlayEl.classList.add('show');
+    }
+
+    function closeEndOverlay() {
+      endOverlayEl.classList.remove('show');
+    }
+
+    function showStartOverlay() {
+      startOverlayEl.classList.add('show');
+    }
+
+    function hideStartOverlay() {
+      startOverlayEl.classList.remove('show');
+    }
+
+    function showRulesOverlay() {
+      rulesOverlayEl.classList.add('show');
+    }
+
+    function hideRulesOverlay() {
+      rulesOverlayEl.classList.remove('show');
+    }
+
+    function initBoard() {
+      boardEl.innerHTML = '';
+      boardState = Array.from({ length: ROWS }, () => Array(COLS).fill(''));
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const div = document.createElement('div');
+          div.className = 'tile';
+          div.dataset.row = r;
+          div.dataset.col = c;
+          boardEl.appendChild(div);
+        }
+      }
+    }
+
+    function updateAttemptsText() {
+      attemptsTextEl.textContent = '';
+    }
+
+    function updateLevelUI() {
+      levelBadgeEl.textContent = LEVELS[currentLevelIndex].name;
+      levelCorrectEl.textContent = levelCorrectCount;
+    }
+
+    function getCurrentLevelBucket() {
+      if (!idiomData || !idiomData.levels) return [];
+      const levelKey = LEVELS[currentLevelIndex].key;
+      const bucket = idiomData.levels[levelKey] || [];
+      return bucket;
+    }
+
+    function pickRandomIdiom() {
+      const bucket = getCurrentLevelBucket();
+      if (!bucket.length) {
+        console.warn('題庫為空或尚未載入，無法選題');
+        return '';
+      }
+      const usedSet = new Set(solvedIdioms);
+      const available = bucket.filter(i => !usedSet.has(i));
+      const pool = available.length > 0 ? available : bucket;
+      const idx = Math.floor(Math.random() * pool.length);
+      return pool[idx];
+    }
+
+    function getAllCharsPool() {
+      if (ALL_CHARS && ALL_CHARS.length) return ALL_CHARS;
+      if (!idiomData || !idiomData.levels) return '';
+      const all = [];
+      Object.values(idiomData.levels).forEach(list => {
+        list.forEach(idiom => {
+          idiom.split('').forEach(ch => all.push(ch));
+        });
+      });
+      ALL_CHARS = Array.from(new Set(all)).join('');
+      return ALL_CHARS;
+    }
+
+    async function loadRandomCharsFromFile() {
+      try {
+        const res = await fetch('random.json');
+        if (!res.ok) throw new Error('載入 random.json 失敗');
+        const data = await res.json();
+        if (Array.isArray(data.randomChars)) {
+          ALL_CHARS = Array.from(new Set(data.randomChars.join(''))).join('');
+        }
+      } catch (e) {
+        console.warn('使用題庫自帶字庫作為備援方案：', e);
+        getAllCharsPool();
+      }
+    }
+
+    function getRandomChars(n, excludeChars) {
+      const pool = Array.from(new Set(ALL_CHARS.split('').filter(ch => !excludeChars.includes(ch))));
+      const result = [];
+      for (let i = 0; i < n && pool.length > 0; i++) {
+        const idx = Math.floor(Math.random() * pool.length);
+        result.push(pool[idx]);
+        pool.splice(idx, 1);
+      }
+      return result;
+    }
+
+    function buildCharPool() {
+      poolEl.innerHTML = '';
+      const ansChars = answer.split('');
+      // 手機版：總共只顯示 16 個字（包含答案 4 字）
+      const randomChars = getRandomChars(12, ansChars);
+      let chars = ansChars.concat(randomChars);
+      for (let i = chars.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [chars[i], chars[j]] = [chars[j], chars[i]];
+      }
+      chars.forEach((ch, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'char-btn';
+        btn.textContent = ch;
+        btn.dataset.char = ch;
+        btn.dataset.index = idx;
+        btn.addEventListener('click', () => onCharClick(ch, btn));
+        poolEl.appendChild(btn);
+      });
+    }
+
+    function setInputEnabled(enabled) {
+      const charButtons = poolEl.querySelectorAll('.char-btn');
+      charButtons.forEach(btn => {
+        if (enabled) {
+          btn.classList.remove('disabled');
+        } else {
+          btn.classList.add('disabled');
+        }
+      });
+      btnUndo.disabled = !enabled;
+    }
+
+    function getCharButtonsByChar(ch) {
+      return Array.from(poolEl.querySelectorAll(`.char-btn[data-char="${ch}"]`));
+    }
+
+    function markAbsentChars(guess) {
+      const answerChars = answer.split('');
+
+      const remaining = {};
+      answerChars.forEach((ch, i) => {
+        const g = guess[i];
+        if (g === ch) {
+        } else {
+          remaining[ch] = (remaining[ch] || 0) + 1;
+        }
+      });
+
+      const usedCount = {};
+      for (let i = 0; i < COLS; i++) {
+        const ch = guess[i];
+        if (!answerChars.includes(ch)) {
+          const buttons = getCharButtonsByChar(ch);
+          buttons.forEach(btn => btn.classList.add('absent-global'));
+        } else {
+          usedCount[ch] = (usedCount[ch] || 0) + 1;
+          if (!remaining[ch] && guess[i] !== answerChars[i]) {
+            const buttons = getCharButtonsByChar(ch);
+            buttons.forEach(btn => btn.classList.add('used'));
+          }
+        }
+      }
+    }
+
+    function onCharClick(ch, btn) {
+      if (gameOver || waitingForClickToContinue) return;
+      if (btn.classList.contains('used') || btn.classList.contains('disabled') || btn.classList.contains('absent-global')) return;
+      if (currentCol >= COLS) {
+        const rowTiles = getRowTiles(currentRow);
+        rowTiles.forEach(t => t.classList.add('shake'));
+        setTimeout(() => rowTiles.forEach(t => t.classList.remove('shake')), 220);
+        showToast('本列已填滿 4 個字，請先送出或刪除。');
+        return;
+      }
+      const rowTiles = getRowTiles(currentRow);
+      const tile = rowTiles[currentCol];
+      tile.textContent = ch;
+      tile.classList.add('filled');
+      boardState[currentRow][currentCol] = ch;
+      currentCol++;
+    }
+
+    function getRowTiles(row) {
+      return Array.from(boardEl.querySelectorAll(`.tile[data-row="${row}"]`));
+    }
+
+    function undoChar() {
+      if (gameOver || waitingForClickToContinue) return;
+      if (currentCol === 0) {
+        showToast('本列沒有可以刪除的字。');
+        return;
+      }
+      currentCol--;
+      const rowTiles = getRowTiles(currentRow);
+      const tile = rowTiles[currentCol];
+      tile.textContent = '';
+      tile.classList.remove('filled');
+      boardState[currentRow][currentCol] = '';
+    }
+
+    function colorRow(row, guess) {
+      const tiles = getRowTiles(row);
+      const answerChars = answer.split('');
+      const result = Array(COLS).fill('absent');
+
+      const remaining = {};
+      answerChars.forEach((ch, i) => {
+        if (guess[i] === ch) {
+          result[i] = 'correct';
+        } else {
+          remaining[ch] = (remaining[ch] || 0) + 1;
+        }
+      });
+
+      for (let i = 0; i < COLS; i++) {
+        if (result[i] === 'correct') continue;
+        const ch = guess[i];
+        if (remaining[ch] > 0) {
+          result[i] = 'present';
+          remaining[ch]--;
+        }
+      }
+
+      tiles.forEach((tile, i) => {
+        tile.classList.remove('filled', 'correct', 'present', 'absent');
+        tile.classList.add(result[i]);
+      });
+
+      markAbsentChars(guess);
+    }
+
+    function showCenterMessage() {
+      centerMessageEl.classList.add('show');
+    }
+
+    function hideCenterMessage() {
+      centerMessageEl.classList.remove('show');
+    }
+
+    function enterNextQuestionMode() {
+      waitingForClickToContinue = true;
+      setInputEnabled(false);
+      showCenterMessage();
+      btnSubmit.textContent = '下一題';
+    }
+
+    function exitNextQuestionMode() {
+      waitingForClickToContinue = false;
+      hideCenterMessage();
+      setInputEnabled(true);
+      btnSubmit.textContent = '送出答案';
+    }
+
+    function handleCorrectAnswer() {
+      levelCorrectCount++;
+      solvedIdioms.push(answer);
+
+      const finishedAllLevels = (currentLevelIndex === LEVELS.length - 1 && levelCorrectCount >= 5);
+      if (finishedAllLevels) {
+        updateLevelUI();
+        statusTextEl.textContent = '';
+        gameOver = true;
+        showCenterMessage();
+        btnSubmit.disabled = true;
+        setInputEnabled(false);
+        openEndOverlay('恭喜！你是成語達人', '點擊「再玩一次」可以重新開始新遊戲。');
+        return;
+      }
+
+      if (levelCorrectCount >= 5) {
+        currentLevelIndex++;
+        levelCorrectCount = 0;
+        showToast(`升級到「${LEVELS[currentLevelIndex].name}」！`, 2000);
+      }
+
+      updateLevelUI();
+      statusTextEl.textContent = '';
+      enterNextQuestionMode();
+    }
+
+    function submitRow() {
+      if (gameOver) return;
+
+      if (waitingForClickToContinue) {
+        exitNextQuestionMode();
+        newRound();
+        return;
+      }
+
+      if (currentCol < COLS) {
+        showToast('請先填滿四個字再送出。');
+        const rowTiles = getRowTiles(currentRow);
+        rowTiles.forEach(t => t.classList.add('shake'));
+        setTimeout(() => rowTiles.forEach(t => t.classList.remove('shake')), 220);
+        return;
+      }
+
+      const guess = boardState[currentRow].join('');
+      colorRow(currentRow, guess);
+
+      if (guess === answer) {
+        handleCorrectAnswer();
+        return;
+      }
+
+      currentRow++;
+      if (currentRow >= ROWS) {
+        gameOver = true;
+        statusTextEl.textContent = `Game Over，正確答案是：${answer}`;
+        openEndOverlay('Game Over', '再玩一次，挑戰更多成語吧！');
+      } else {
+        currentCol = 0;
+        updateAttemptsText();
+      }
+    }
+
+    function newRound() {
+      answer = pickRandomIdiom();
+      if (!answer) {
+        statusTextEl.textContent = '題庫尚未載入完成，請稍後再試。';
+        return;
+      }
+      currentRow = 0;
+      currentCol = 0;
+      gameOver = false;
+      hideCenterMessage();
+      statusTextEl.textContent = '';
+      initBoard();
+      buildCharPool();
+      updateAttemptsText();
+      btnSubmit.disabled = false;
+    }
+
+    function restartGame() {
+      currentLevelIndex = 0;
+      levelCorrectCount = 0;
+      solvedIdioms = [];
+      closeEndOverlay();
+      updateLevelUI();
+      exitNextQuestionMode();
+      newRound();
+    }
+
+    async function loadIdiomData() {
+      try {
+        const res = await fetch('data/wordle_game_data.json');
+        if (!res.ok) throw new Error('載入題庫失敗');
+        idiomData = await res.json();
+        await loadRandomCharsFromFile();
+        if (!ALL_CHARS) {
+          getAllCharsPool();
+        }
+        // 不在載入時自動開始，等玩家按「開始遊戲」
+      } catch (e) {
+        console.error(e);
+        statusTextEl.textContent = '無法載入題庫，請確認 wordle_game_data.json 是否存在。';
+      }
+    }
+
+    btnSubmit.addEventListener('click', submitRow);
+    btnUndo.addEventListener('click', undoChar);
+    btnRetry.addEventListener('click', () => {
+      restartGame();
+      hideStartOverlay();
+    });
+
+    btnStartGame.addEventListener('click', () => {
+      hideStartOverlay();
+      if (!idiomData) {
+        showToast('題庫載入中，請稍後再試。');
+        return;
+      }
+      newRound();
+    });
+
+    btnStartRules.addEventListener('click', () => {
+      showRulesOverlay();
+    });
+
+    btnOpenRules.addEventListener('click', () => {
+      showRulesOverlay();
+    });
+
+    btnCloseRules.addEventListener('click', () => {
+      hideRulesOverlay();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitRow();
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        undoChar();
+      }
+    });
+
+    updateLevelUI();
+    loadIdiomData();
+  </script>
+</body>
+</html>
