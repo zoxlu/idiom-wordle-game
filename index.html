@@ -164,25 +164,28 @@
     .board-wrapper {
       background: var(--board-bg);
       border-radius: 16px;
-      padding: 12px 10px 14px;
+      padding: 8px 10px 10px;
       border: 1px solid #1f2937;
       box-shadow: 0 14px 32px rgba(15, 23, 42, 0.85);
       display: flex;
       flex-direction: column;
-      height: 100%;
+      height: calc(100vh - 70px);
+      max-height: 720px;
     }
 
     .info-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
       font-size: 12px;
       color: #e5e7eb;
     }
 
     .status-text {
-      min-height: 16px;
+      min-height: 14px;
+      font-size: 11px;
+      font-weight: 700;
       transition: transform 0.25s ease-out, color 0.25s ease-out, font-size 0.25s ease-out;
     }
 
@@ -192,9 +195,9 @@
 
     .status-text.level-up {
       color: #fb923c;
-      font-size: 18px;
+      font-size: 12px;
       font-weight: 800;
-      transform: scale(1.05);
+      transform: scale(1.02);
     }
 
     .attempts {
@@ -208,7 +211,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       font-size: 12px;
       color: #e5e7eb;
     }
@@ -216,7 +219,7 @@
     .level-badge {
       display: inline-flex;
       align-items: center;
-      padding: 3px 10px;
+      padding: 2px 9px;
       border-radius: 999px;
       background: #0b1220;
       border: 1px solid #4b5563;
@@ -236,23 +239,22 @@
 
     .board {
       display: grid;
-      grid-template-rows: repeat(4, var(--tile-size));
-      grid-template-columns: repeat(4, var(--tile-size));
+      grid-template-rows: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       justify-content: center;
-      gap: 6px;
-      margin-bottom: 6px;
-      flex-shrink: 0;
+      gap: 4px;
+      margin-bottom: 4px;
+      flex: 0 0 34%;
     }
 
     .tile {
-      width: var(--tile-size);
-      height: var(--tile-size);
+      aspect-ratio: 1 / 1;
       border-radius: 10px;
       border: 2px solid var(--tile-border);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 26px;
+      font-size: clamp(20px, 4.8vw, 26px);
       font-weight: 700;
       background: var(--tile-empty-bg);
       color: var(--text-main);
@@ -296,43 +298,44 @@
     }
 
     .pool-wrapper {
-      margin-top: 6px;
-      padding-top: 8px;
+      margin-top: 4px;
+      padding-top: 6px;
       border-top: 1px dashed #334155;
-      flex: 1;
+      flex: 1 1 auto;
       display: flex;
       flex-direction: column;
+      min-height: 0;
     }
 
     .pool-title {
-      font-size: 12px;
-      margin-bottom: 6px;
+      font-size: 11px;
+      margin-bottom: 4px;
       color: #e5e7eb;
       flex-shrink: 0;
     }
 
     .char-pool {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px 8px;
       justify-content: center;
-      flex: 1;
+      flex: 1 1 auto;
       align-content: start;
     }
 
     .char-btn {
-      padding: 8px 0;
+      padding: 6px 0;
       border-radius: 10px;
       border: 1px solid #9ca3af;
       background: radial-gradient(circle at top, #0f172a, #020617 70%);
       color: #f9fafb;
-      font-size: 22px;
+      font-size: clamp(18px, 4.6vw, 22px);
       font-weight: 700;
       text-align: center;
       cursor: pointer;
       transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
       user-select: none;
-      min-height: 56px;
+      min-height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -373,10 +376,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 10px;
+      margin-top: 6px;
       gap: 8px;
       flex-wrap: wrap;
       flex-shrink: 0;
+      padding-top: 4px;
+      border-top: 1px dashed #334155;
     }
 
     .controls-left {
@@ -394,10 +399,10 @@
 
     .center-message {
       text-align: center;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 900;
       color: #f97316;
-      margin-top: 6px;
+      margin-top: 4px;
       opacity: 0;
       transform: translateY(4px);
       transition: opacity 0.25s ease-out, transform 0.25s ease-out;
@@ -457,17 +462,17 @@
     }
 
     .modal-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 8px;
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 10px;
       text-align: center;
     }
 
     .modal-body {
-      font-size: 13px;
-      margin-bottom: 10px;
+      font-size: 15px;
+      margin-bottom: 12px;
       color: #e5e7eb;
-      line-height: 1.7;
+      line-height: 1.8;
     }
 
     .modal-body ul {
@@ -483,7 +488,7 @@
       display: flex;
       justify-content: center;
       gap: 10px;
-      margin-top: 8px;
+      margin-top: 10px;
       flex-wrap: wrap;
     }
 
@@ -491,19 +496,74 @@
     .highlight-present { color: #facc15; font-weight: 600; }
 
     .modal-share-certificate {
-      background: #020617;
-      border-radius: 12px;
-      padding: 12px 14px;
-      border: 1px dashed #4b5563;
-      margin-top: 8px;
+      background: rgba(2, 6, 23, 0.9);
+      border-radius: 16px;
+      padding: 10px 12px;
+      border: 1px dashed #f97316;
+      margin-top: 10px;
       font-size: 12px;
       color: #e5e7eb;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modal-share-certificate::before,
+    .modal-share-certificate::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      pointer-events: none;
+    }
+
+    .modal-share-certificate::before {
+      inset: 3px;
+    }
+
+    .modal-share-certificate::after {
+      inset: 6px;
+      border-style: dotted;
+      opacity: 0.6;
     }
 
     .modal-share-certificate h4 {
       margin-bottom: 4px;
       font-size: 13px;
       color: #fbbf24;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+    }
+
+    .modal-share-certificate p {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* 橫向螢幕不支援提示 */
+    .orientation-overlay {
+      position: fixed;
+      inset: 0;
+      background: #020617;
+      color: #e5e7eb;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      z-index: 50;
+    }
+
+    .orientation-overlay.show {
+      display: flex;
+    }
+
+    .orientation-message {
+      max-width: 320px;
+      font-size: 16px;
+      line-height: 1.7;
+      font-weight: 600;
     }
 
     @media (max-width: 400px) {
@@ -511,19 +571,20 @@
         --tile-size: 56px;
       }
       .title { font-size: 16px; }
-      .char-btn { font-size: 20px; min-height: 52px; }
+      .char-btn { font-size: 18px; min-height: 40px; }
       .main-panel { padding-inline: 8px; }
     }
 
     @media (max-height: 640px) {
       .board-wrapper {
-        padding-block: 10px;
+        padding-block: 6px;
+        height: calc(100vh - 60px);
       }
-      .pool-wrapper {
-        margin-top: 4px;
+      .board {
+        flex-basis: 30%;
       }
       .char-btn {
-        min-height: 50px;
+        min-height: 40px;
       }
     }
 
@@ -601,7 +662,7 @@
     <main class="main-panel">
       <section class="board-wrapper" id="board-wrapper">
         <div class="info-row">
-          <div class="status-text" id="status-text"></div>
+          <div class="instructions-text">請從下方選字，依序填入上方空格：</div>
           <div class="attempts" id="attempts-text"></div>
         </div>
 
@@ -612,6 +673,8 @@
           </div>
           <div class="level-progress">本級已答對 <strong id="level-correct">0</strong> 題</div>
         </div>
+
+        <div class="status-text" id="status-text"></div>
 
         <div class="board" id="board"></div>
         <div class="center-message" id="center-message">正確答案</div>
@@ -633,7 +696,11 @@
     </main>
   </div>
 
-  <canvas id="share-canvas" width="600" height="900" style="display:none;"></canvas>
+  <div class="orientation-overlay" id="orientation-overlay">
+    <div class="orientation-message">遊戲顯示不支援橫向螢幕，請將手機轉回直立。</div>
+  </div>
+
+  <canvas id="share-canvas" width="600" height="450" style="display:none;"></canvas>
 
   <script>
     const LEVELS = [
@@ -672,6 +739,7 @@
     const endActionsEl = document.getElementById('end-actions');
 
     const shareCanvas = document.getElementById('share-canvas');
+    const orientationOverlay = document.getElementById('orientation-overlay');
 
     let ALL_CHARS = '';
     let idiomData = null;
@@ -699,13 +767,13 @@
       }, duration);
     }
 
-    function openEndOverlay(title, bodyHtml, showShare = false, allCleared = false) {
+    function openEndOverlay(title, bodyHtml, showShare = false, allCleared = false, isWrongAnswer = false) {
       endTitleEl.textContent = title;
       endBodyEl.innerHTML = bodyHtml;
 
       endActionsEl.innerHTML = '';
 
-      if (showShare) {
+      if (showShare && !isWrongAnswer) {
         const btnShare = document.createElement('button');
         btnShare.className = 'btn btn-ghost btn-wide';
         btnShare.textContent = '分享';
@@ -753,7 +821,7 @@
       });
       endActionsEl.appendChild(btnRetryClone);
 
-      if (allCleared) {
+      if (allCleared && !isWrongAnswer) {
         const extra = document.createElement('div');
         extra.className = 'modal-share-certificate';
         extra.innerHTML = '<h4>恭喜破關！</h4><p>你已完成所有等級的成語挑戰，快用上方「分享」按鈕，把你的成就秀給朋友看吧！</p>';
@@ -1043,7 +1111,7 @@
         const extraLine = '<p style="margin-top:6px;color:#fbbf24;font-weight:700;">恭喜破關！</p>';
         const summary = `<p>成語能力：${levelName}</p><p>答題結果：共答對 ${totalCorrect} 題，正確率 ${accuracy}%</p>` + extraLine;
 
-        openEndOverlay('成語能力總結', summary, true, true);
+        openEndOverlay('成語能力總結', summary, true, true, false);
         return;
       }
 
@@ -1095,10 +1163,7 @@
       if (currentRow >= ROWS) {
         totalQuestions++;
         gameOver = true;
-        const levelName = getCurrentLevelLabel();
-        const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
-        const summary = `<p>成語能力：${levelName}</p><p>答題結果：共答對 ${totalCorrect} 題，正確率 ${accuracy}%</p>`;
-        openEndOverlay('成語能力總結', summary, true, false);
+        openEndOverlay('答案錯誤，遊戲結束', `<p>答案錯誤，遊戲結束。</p>`, false, false, true);
       } else {
         currentCol = 0;
         updateAttemptsText();
@@ -1158,57 +1223,64 @@
           const w = canvas.width;
           const h = canvas.height;
 
-          ctx.fillStyle = '#020617';
+          ctx.fillStyle = '#111827';
           ctx.fillRect(0, 0, w, h);
 
           const grad = ctx.createLinearGradient(0, 0, 0, h);
-          grad.addColorStop(0, '#0f172a');
-          grad.addColorStop(1, '#020617');
+          grad.addColorStop(0, '#111827');
+          grad.addColorStop(0.5, '#020617');
+          grad.addColorStop(1, '#111827');
           ctx.fillStyle = grad;
-          ctx.fillRect(24, 24, w - 48, h - 48);
+          ctx.fillRect(16, 16, w - 32, h - 32);
 
-          ctx.strokeStyle = '#f97316';
-          ctx.lineWidth = 3;
-          ctx.strokeRect(28, 28, w - 56, h - 56);
+          ctx.strokeStyle = '#fbbf24';
+          ctx.lineWidth = 2.5;
+          ctx.strokeRect(24, 24, w - 48, h - 48);
 
-          ctx.fillStyle = '#f97316';
-          ctx.font = 'bold 40px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          ctx.strokeStyle = 'rgba(248, 113, 22, 0.8)';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([6, 4]);
+          ctx.strokeRect(32, 32, w - 64, h - 64);
+          ctx.setLineDash([]);
+
+          ctx.fillStyle = '#fbbf24';
+          ctx.font = 'bold 28px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText('成語 WORDLE 證書', w / 2, 90);
+          ctx.fillText('成語 WORDLE 認證', w / 2, 70);
 
           ctx.fillStyle = '#e5e7eb';
-          ctx.font = '18px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          ctx.fillText('成語能力認證', w / 2, 140);
+          ctx.font = '16px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          ctx.fillText('成語能力證書', w / 2, 100);
 
           const levelName = getCurrentLevelLabel();
           const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
 
           ctx.textAlign = 'left';
           ctx.fillStyle = '#fbbf24';
-          ctx.font = 'bold 24px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          ctx.fillText('達成等級：' + levelName, 80, 210);
+          ctx.font = 'bold 20px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          ctx.fillText('達成等級：' + levelName, 60, 150);
 
           ctx.fillStyle = '#e5e7eb';
-          ctx.font = '20px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          ctx.fillText('總答題數：' + totalQuestions + ' 題', 80, 260);
-          ctx.fillText('答對題數：' + totalCorrect + ' 題', 80, 300);
-          ctx.fillText('正確率：' + accuracy + '%', 80, 340);
+          ctx.font = '16px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          ctx.fillText('總答題數：' + totalQuestions + ' 題', 60, 190);
+          ctx.fillText('答對題數：' + totalCorrect + ' 題', 60, 220);
+          ctx.fillText('正確率：' + accuracy + '%', 60, 250);
 
           ctx.fillStyle = '#9ca3af';
-          ctx.font = '14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          ctx.fillText('（分享這張證書，讓朋友看看你的成語實力！）', 80, 380);
+          ctx.font = '13px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          ctx.fillText('（分享這張證書，讓朋友看看你的成語實力！）', 60, 285);
 
           const now = new Date();
           const dateStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
           ctx.textAlign = 'right';
           ctx.fillStyle = '#6b7280';
-          ctx.font = '14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          ctx.fillText('日期：' + dateStr, w - 80, h - 80);
+          ctx.font = '12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          ctx.fillText('日期：' + dateStr, w - 60, h - 50);
 
           ctx.textAlign = 'center';
           ctx.fillStyle = '#4b5563';
           ctx.font = '12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          ctx.fillText('成語 Wordle 小遊戲', w / 2, h - 50);
+          ctx.fillText('成語 Wordle 小遊戲', w / 2, h - 28);
 
           const url = canvas.toDataURL('image/png');
           resolve(url);
@@ -1216,6 +1288,15 @@
           reject(err);
         }
       });
+    }
+
+    function checkOrientation() {
+      const isLandscape = window.matchMedia('(orientation: landscape)').matches || window.innerWidth > window.innerHeight;
+      if (isLandscape) {
+        orientationOverlay.classList.add('show');
+      } else {
+        orientationOverlay.classList.remove('show');
+      }
     }
 
     btnSubmit.addEventListener('click', submitRow);
@@ -1269,8 +1350,12 @@
       e.preventDefault();
     });
 
+    window.addEventListener('orientationchange', checkOrientation);
+    window.addEventListener('resize', checkOrientation);
+
     updateLevelUI();
     loadIdiomData();
+    checkOrientation();
   </script>
 </body>
 </html>
