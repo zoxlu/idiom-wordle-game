@@ -515,7 +515,7 @@
         </ul>
       </div>
       <div class="modal-actions">
-        <button class="btn btn-ghost btn-small" id="btn-start-rules">先看規則</button>
+        <button class="btn btn-ghost btn-small" id="btn-start-rules">遊戲規則</button>
         <button class="btn btn-primary btn-wide" id="btn-start-game">開始遊戲</button>
       </div>
     </div>
@@ -529,10 +529,11 @@
         <p>每一題的目標是猜出一個四字成語：</p>
         <ul>
           <li>從畫面下方 16 個字中選出 <strong>4 個</strong>，依順序填進上方 4 個格子。</li>
-          <li>填滿後按「送出答案」，系統會用顏色給你提示。</li>
+          <li>填滿後按「送出答案」。</li>
           <li><span class="highlight-correct">綠色</span>：字和<strong>位置</strong>都正確。</li>
           <li><span class="highlight-present">土黃色</span>：字有出現在答案中，但<strong>位置不對</strong>。</li>
           <li>灰色：這個字沒有出現在答案中。</li>
+          <li>每題有四次作答機會。>每題有四
         </ul>
         <p style="margin-top:6px;">連續答對多題可以升級，挑戰更困難的成語！</p>
       </div>
@@ -565,14 +566,17 @@
             等級：
             <span class="level-badge" id="level-badge">小學生</span>
           </div>
-          <div class="level-progress">本級已答對 <strong id="level-correct">0</strong> / 5 題</div>
+          <!--<div class="level-progress">本級已答對 <strong id="level-correct">0</strong> / 5 題</div>-->
+          <div class="level-progress">本級已答對 <strong id="level-correct">0</strong> 題</div>
         </div>
 
         <div class="board" id="board"></div>
-        <div class="center-message" id="center-message">正確答案！點擊「下一題」繼續</div>
+        <!--<div class="center-message" id="center-message">正確答案！點擊「下一題」繼續</div>-->
+        <div class="center-message" id="center-message">正確答案！</div>
+
 
         <div class="pool-wrapper">
-          <div class="pool-title">請用手指點選下方文字，依順序填入上方空格：</div>
+          <div class="pool-title">請點選下方文字，依順序填入上方空格：</div>
           <div class="char-pool" id="char-pool"></div>
         </div>
 
