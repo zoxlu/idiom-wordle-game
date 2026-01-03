@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>成語猜謎遊戲 - 手機版</title>
   <style>
     :root {
@@ -28,6 +28,7 @@
 
     html, body {
       height: 100%;
+      overscroll-behavior: none;
     }
 
     body {
@@ -37,6 +38,7 @@
       display: flex;
       align-items: stretch;
       justify-content: center;
+      touch-action: manipulation;
     }
 
     .game-shell {
@@ -156,6 +158,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      overflow: hidden;
     }
 
     .board-wrapper {
@@ -164,6 +167,9 @@
       padding: 12px 10px 14px;
       border: 1px solid #1f2937;
       box-shadow: 0 14px 32px rgba(15, 23, 42, 0.85);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
     }
 
     .info-row {
@@ -177,10 +183,18 @@
 
     .status-text {
       min-height: 16px;
+      transition: transform 0.25s ease-out, color 0.25s ease-out, font-size 0.25s ease-out;
     }
 
     .status-text strong {
       color: #facc15;
+    }
+
+    .status-text.level-up {
+      color: #fb923c;
+      font-size: 18px;
+      font-weight: 800;
+      transform: scale(1.05);
     }
 
     .attempts {
@@ -227,6 +241,7 @@
       justify-content: center;
       gap: 6px;
       margin-bottom: 6px;
+      flex-shrink: 0;
     }
 
     .tile {
@@ -284,12 +299,16 @@
       margin-top: 6px;
       padding-top: 8px;
       border-top: 1px dashed #334155;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
     }
 
     .pool-title {
       font-size: 12px;
       margin-bottom: 6px;
       color: #e5e7eb;
+      flex-shrink: 0;
     }
 
     .char-pool {
@@ -297,6 +316,8 @@
       grid-template-columns: repeat(4, 1fr);
       gap: 8px 12px;
       justify-content: center;
+      flex: 1;
+      align-content: start;
     }
 
     .char-btn {
@@ -355,6 +376,7 @@
       margin-top: 10px;
       gap: 8px;
       flex-wrap: wrap;
+      flex-shrink: 0;
     }
 
     .controls-left {
@@ -428,7 +450,7 @@
       border-radius: 16px;
       padding: 18px 16px 14px;
       border: 1px solid #1f2937;
-      max-width: 340px;
+      max-width: 360px;
       width: 92%;
       text-align: left;
       box-shadow: 0 18px 45px rgba(0, 0, 0, 0.85);
@@ -462,10 +484,27 @@
       justify-content: center;
       gap: 10px;
       margin-top: 8px;
+      flex-wrap: wrap;
     }
 
     .highlight-correct { color: #4ade80; font-weight: 600; }
     .highlight-present { color: #facc15; font-weight: 600; }
+
+    .modal-share-certificate {
+      background: #020617;
+      border-radius: 12px;
+      padding: 12px 14px;
+      border: 1px dashed #4b5563;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #e5e7eb;
+    }
+
+    .modal-share-certificate h4 {
+      margin-bottom: 4px;
+      font-size: 13px;
+      color: #fbbf24;
+    }
 
     @media (max-width: 400px) {
       :root {
@@ -487,23 +526,30 @@
         min-height: 50px;
       }
     }
+
+    @media (min-width: 768px) and (min-height: 700px) {
+      body {
+        align-items: center;
+      }
+      .game-shell {
+        max-height: 720px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="toast" id="toast"></div>
 
-  <!-- 結束遊戲彈窗（沿用原結束邏輯） -->
   <div class="overlay" id="end-overlay">
     <div class="modal">
       <div class="modal-title" id="end-title"></div>
       <div class="modal-body" id="end-body"></div>
-      <div class="modal-actions">
+      <div class="modal-actions" id="end-actions">
         <button class="btn btn-primary btn-wide" id="btn-retry">再玩一次</button>
       </div>
     </div>
   </div>
 
-  <!-- 開場說明彈窗（左側內容搬移） -->
   <div class="overlay show" id="start-overlay">
     <div class="modal">
       <div class="modal-title">成語猜謎</div>
@@ -521,7 +567,6 @@
     </div>
   </div>
 
-  <!-- 遊戲規則彈窗（可隨時開啟） -->
   <div class="overlay" id="rules-overlay">
     <div class="modal">
       <div class="modal-title">遊戲規則</div>
@@ -529,11 +574,10 @@
         <p>每一題的目標是猜出一個四字成語：</p>
         <ul>
           <li>從畫面下方 16 個字中選出 <strong>4 個</strong>，依順序填進上方 4 個格子。</li>
-          <li>填滿後按「送出答案」。</li>
+          <li>填滿後按「送出答案」，系統會用顏色給你提示。</li>
           <li><span class="highlight-correct">綠色</span>：字和<strong>位置</strong>都正確。</li>
           <li><span class="highlight-present">土黃色</span>：字有出現在答案中，但<strong>位置不對</strong>。</li>
           <li>灰色：這個字沒有出現在答案中。</li>
-          <li>每題有四次作答機會。</li>
         </ul>
         <p style="margin-top:6px;">連續答對多題可以升級，挑戰更困難的成語！</p>
       </div>
@@ -566,14 +610,11 @@
             等級：
             <span class="level-badge" id="level-badge">小學生</span>
           </div>
-          <!--<div class="level-progress">本級已答對 <strong id="level-correct">0</strong> / 5 題</div>-->
           <div class="level-progress">本級已答對 <strong id="level-correct">0</strong> 題</div>
         </div>
 
         <div class="board" id="board"></div>
-        <!--<div class="center-message" id="center-message">正確答案！點擊「下一題」繼續</div>-->
-        <div class="center-message" id="center-message">正確答案！</div>
-
+        <div class="center-message" id="center-message">正確答案</div>
 
         <div class="pool-wrapper">
           <div class="pool-title">請點選下方文字，依順序填入上方空格：</div>
@@ -591,6 +632,8 @@
       </section>
     </main>
   </div>
+
+  <canvas id="share-canvas" width="600" height="900" style="display:none;"></canvas>
 
   <script>
     const LEVELS = [
@@ -626,6 +669,9 @@
     const btnSubmit = document.getElementById('btn-submit');
     const btnUndo = document.getElementById('btn-undo');
     const btnRetry = document.getElementById('btn-retry');
+    const endActionsEl = document.getElementById('end-actions');
+
+    const shareCanvas = document.getElementById('share-canvas');
 
     let ALL_CHARS = '';
     let idiomData = null;
@@ -641,6 +687,9 @@
     let levelCorrectCount = 0;
     let solvedIdioms = [];
 
+    let totalQuestions = 0;
+    let totalCorrect = 0;
+
     function showToast(msg, duration = 1500) {
       toastEl.textContent = msg;
       toastEl.classList.add('show');
@@ -650,9 +699,67 @@
       }, duration);
     }
 
-    function openEndOverlay(title, body) {
+    function openEndOverlay(title, bodyHtml, showShare = false, allCleared = false) {
       endTitleEl.textContent = title;
-      endBodyEl.textContent = body;
+      endBodyEl.innerHTML = bodyHtml;
+
+      endActionsEl.innerHTML = '';
+
+      if (showShare) {
+        const btnShare = document.createElement('button');
+        btnShare.className = 'btn btn-ghost btn-wide';
+        btnShare.textContent = '分享';
+        btnShare.id = 'btn-share';
+        btnShare.addEventListener('click', async () => {
+          try {
+            const url = await generateCertificateImage();
+            if (navigator.share) {
+              try {
+                const res = await fetch(url);
+                const blob = await res.blob();
+                const file = new File([blob], 'chengyu-wordle-certificate.png', { type: 'image/png' });
+                await navigator.share({
+                  files: [file],
+                  title: '成語 Wordle 證書',
+                  text: '我的成語能力認證卡'
+                });
+              } catch (err) {
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'chengyu-wordle-certificate.png';
+                link.click();
+                showToast('成語 Wordle 證書，可手動分享或儲存。', 2500);
+              }
+            } else {
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = 'chengyu-wordle-certificate.png';
+              link.click();
+              showToast('成語 Wordle 證書，可手動分享或儲存。', 2500);
+            }
+          } catch (err) {
+            console.error(err);
+            showToast('產生證書圖片時發生錯誤。', 2000);
+          }
+        });
+        endActionsEl.appendChild(btnShare);
+      }
+
+      const btnRetryClone = btnRetry.cloneNode(true);
+      btnRetryClone.id = 'btn-retry';
+      btnRetryClone.addEventListener('click', () => {
+        restartGame();
+        hideStartOverlay();
+      });
+      endActionsEl.appendChild(btnRetryClone);
+
+      if (allCleared) {
+        const extra = document.createElement('div');
+        extra.className = 'modal-share-certificate';
+        extra.innerHTML = '<h4>恭喜破關！</h4><p>你已完成所有等級的成語挑戰，快用上方「分享」按鈕，把你的成就秀給朋友看吧！</p>';
+        endBodyEl.appendChild(extra);
+      }
+
       endOverlayEl.classList.add('show');
     }
 
@@ -692,6 +799,10 @@
 
     function updateAttemptsText() {
       attemptsTextEl.textContent = '';
+    }
+
+    function getCurrentLevelName() {
+      return LEVELS[currentLevelIndex].name;
     }
 
     function updateLevelUI() {
@@ -760,7 +871,6 @@
     function buildCharPool() {
       poolEl.innerHTML = '';
       const ansChars = answer.split('');
-      // 手機版：總共只顯示 16 個字（包含答案 4 字）
       const randomChars = getRandomChars(12, ansChars);
       let chars = ansChars.concat(randomChars);
       for (let i = chars.length - 1; i > 0; i--) {
@@ -911,30 +1021,43 @@
       btnSubmit.textContent = '送出答案';
     }
 
+    function getCurrentLevelLabel() {
+      return LEVELS[currentLevelIndex].name;
+    }
+
     function handleCorrectAnswer() {
       levelCorrectCount++;
+      totalCorrect++;
       solvedIdioms.push(answer);
 
       const finishedAllLevels = (currentLevelIndex === LEVELS.length - 1 && levelCorrectCount >= 5);
       if (finishedAllLevels) {
         updateLevelUI();
-        statusTextEl.textContent = '';
         gameOver = true;
         showCenterMessage();
         btnSubmit.disabled = true;
         setInputEnabled(false);
-        openEndOverlay('恭喜！你是成語達人', '點擊「再玩一次」可以重新開始新遊戲。');
+
+        const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+        const levelName = getCurrentLevelLabel();
+        const extraLine = '<p style="margin-top:6px;color:#fbbf24;font-weight:700;">恭喜破關！</p>';
+        const summary = `<p>成語能力：${levelName}</p><p>答題結果：共答對 ${totalCorrect} 題，正確率 ${accuracy}%</p>` + extraLine;
+
+        openEndOverlay('成語能力總結', summary, true, true);
         return;
       }
 
       if (levelCorrectCount >= 5) {
         currentLevelIndex++;
         levelCorrectCount = 0;
-        showToast(`升級到「${LEVELS[currentLevelIndex].name}」！`, 2000);
+        statusTextEl.textContent = `升級為「${LEVELS[currentLevelIndex].name}」！`;
+        statusTextEl.classList.add('level-up');
+      } else {
+        statusTextEl.textContent = '';
+        statusTextEl.classList.remove('level-up');
       }
 
       updateLevelUI();
-      statusTextEl.textContent = '';
       enterNextQuestionMode();
     }
 
@@ -942,6 +1065,8 @@
       if (gameOver) return;
 
       if (waitingForClickToContinue) {
+        statusTextEl.textContent = '';
+        statusTextEl.classList.remove('level-up');
         exitNextQuestionMode();
         newRound();
         return;
@@ -958,16 +1083,22 @@
       const guess = boardState[currentRow].join('');
       colorRow(currentRow, guess);
 
+      if (!answer) return;
+
       if (guess === answer) {
+        totalQuestions++;
         handleCorrectAnswer();
         return;
       }
 
       currentRow++;
       if (currentRow >= ROWS) {
+        totalQuestions++;
         gameOver = true;
-        statusTextEl.textContent = `Game Over，正確答案是：${answer}`;
-        openEndOverlay('Game Over', '再玩一次，挑戰更多成語吧！');
+        const levelName = getCurrentLevelLabel();
+        const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+        const summary = `<p>成語能力：${levelName}</p><p>答題結果：共答對 ${totalCorrect} 題，正確率 ${accuracy}%</p>`;
+        openEndOverlay('成語能力總結', summary, true, false);
       } else {
         currentCol = 0;
         updateAttemptsText();
@@ -985,6 +1116,7 @@
       gameOver = false;
       hideCenterMessage();
       statusTextEl.textContent = '';
+      statusTextEl.classList.remove('level-up');
       initBoard();
       buildCharPool();
       updateAttemptsText();
@@ -995,6 +1127,8 @@
       currentLevelIndex = 0;
       levelCorrectCount = 0;
       solvedIdioms = [];
+      totalQuestions = 0;
+      totalCorrect = 0;
       closeEndOverlay();
       updateLevelUI();
       exitNextQuestionMode();
@@ -1010,15 +1144,83 @@
         if (!ALL_CHARS) {
           getAllCharsPool();
         }
-        // 不在載入時自動開始，等玩家按「開始遊戲」
       } catch (e) {
         console.error(e);
         statusTextEl.textContent = '無法載入題庫，請確認 wordle_game_data.json 是否存在。';
       }
     }
 
+    function generateCertificateImage() {
+      return new Promise((resolve, reject) => {
+        try {
+          const canvas = shareCanvas;
+          const ctx = canvas.getContext('2d');
+          const w = canvas.width;
+          const h = canvas.height;
+
+          ctx.fillStyle = '#020617';
+          ctx.fillRect(0, 0, w, h);
+
+          const grad = ctx.createLinearGradient(0, 0, 0, h);
+          grad.addColorStop(0, '#0f172a');
+          grad.addColorStop(1, '#020617');
+          ctx.fillStyle = grad;
+          ctx.fillRect(24, 24, w - 48, h - 48);
+
+          ctx.strokeStyle = '#f97316';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(28, 28, w - 56, h - 56);
+
+          ctx.fillStyle = '#f97316';
+          ctx.font = 'bold 40px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('成語 WORDLE 證書', w / 2, 90);
+
+          ctx.fillStyle = '#e5e7eb';
+          ctx.font = '18px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          ctx.fillText('成語能力認證', w / 2, 140);
+
+          const levelName = getCurrentLevelLabel();
+          const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+
+          ctx.textAlign = 'left';
+          ctx.fillStyle = '#fbbf24';
+          ctx.font = 'bold 24px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          ctx.fillText('達成等級：' + levelName, 80, 210);
+
+          ctx.fillStyle = '#e5e7eb';
+          ctx.font = '20px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          ctx.fillText('總答題數：' + totalQuestions + ' 題', 80, 260);
+          ctx.fillText('答對題數：' + totalCorrect + ' 題', 80, 300);
+          ctx.fillText('正確率：' + accuracy + '%', 80, 340);
+
+          ctx.fillStyle = '#9ca3af';
+          ctx.font = '14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          ctx.fillText('（分享這張證書，讓朋友看看你的成語實力！）', 80, 380);
+
+          const now = new Date();
+          const dateStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+          ctx.textAlign = 'right';
+          ctx.fillStyle = '#6b7280';
+          ctx.font = '14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          ctx.fillText('日期：' + dateStr, w - 80, h - 80);
+
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#4b5563';
+          ctx.font = '12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          ctx.fillText('成語 Wordle 小遊戲', w / 2, h - 50);
+
+          const url = canvas.toDataURL('image/png');
+          resolve(url);
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+
     btnSubmit.addEventListener('click', submitRow);
     btnUndo.addEventListener('click', undoChar);
+
     btnRetry.addEventListener('click', () => {
       restartGame();
       hideStartOverlay();
@@ -1053,6 +1255,18 @@
         e.preventDefault();
         undoChar();
       }
+    });
+
+    document.addEventListener('gesturestart', function (e) {
+      e.preventDefault();
+    });
+
+    document.addEventListener('gesturechange', function (e) {
+      e.preventDefault();
+    });
+
+    document.addEventListener('gestureend', function (e) {
+      e.preventDefault();
     });
 
     updateLevelUI();
