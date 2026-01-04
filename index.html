@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>成語猜謎遊戲 - 手機版</title>
   <style>
     :root {
@@ -28,7 +28,6 @@
 
     html, body {
       height: 100%;
-      overscroll-behavior: none;
     }
 
     body {
@@ -38,7 +37,6 @@
       display: flex;
       align-items: stretch;
       justify-content: center;
-      touch-action: manipulation;
     }
 
     .game-shell {
@@ -49,6 +47,7 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      position: relative;
     }
 
     .top-bar {
@@ -158,46 +157,31 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      overflow: hidden;
     }
 
     .board-wrapper {
       background: var(--board-bg);
       border-radius: 16px;
-      padding: 8px 10px 10px;
+      padding: 12px 10px 14px;
       border: 1px solid #1f2937;
       box-shadow: 0 14px 32px rgba(15, 23, 42, 0.85);
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh - 70px);
-      max-height: 720px;
     }
 
     .info-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
       font-size: 12px;
       color: #e5e7eb;
     }
 
     .status-text {
-      min-height: 14px;
-      font-size: 11px;
-      font-weight: 700;
-      transition: transform 0.25s ease-out, color 0.25s ease-out, font-size 0.25s ease-out;
+      min-height: 16px;
     }
 
     .status-text strong {
       color: #facc15;
-    }
-
-    .status-text.level-up {
-      color: #fb923c;
-      font-size: 12px;
-      font-weight: 800;
-      transform: scale(1.02);
     }
 
     .attempts {
@@ -214,12 +198,13 @@
       margin-bottom: 4px;
       font-size: 12px;
       color: #e5e7eb;
+      gap: 6px;
     }
 
     .level-badge {
       display: inline-flex;
       align-items: center;
-      padding: 2px 9px;
+      padding: 3px 10px;
       border-radius: 999px;
       background: #0b1220;
       border: 1px solid #4b5563;
@@ -227,9 +212,18 @@
       color: #e5e7eb;
     }
 
+    .promotion-message {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fb923c;
+      text-align: center;
+      min-width: 0;
+    }
+
     .level-progress {
       font-size: 12px;
       color: #e5e7eb;
+      text-align: right;
     }
 
     .level-progress strong {
@@ -239,22 +233,22 @@
 
     .board {
       display: grid;
-      grid-template-rows: repeat(4, minmax(0, 1fr));
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-rows: repeat(4, var(--tile-size));
+      grid-template-columns: repeat(4, var(--tile-size));
       justify-content: center;
-      gap: 4px;
-      margin-bottom: 4px;
-      flex: 0 0 34%;
+      gap: 6px;
+      margin-bottom: 6px;
     }
 
     .tile {
-      aspect-ratio: 1 / 1;
+      width: var(--tile-size);
+      height: var(--tile-size);
       border-radius: 10px;
       border: 2px solid var(--tile-border);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(20px, 4.8vw, 26px);
+      font-size: 26px;
       font-weight: 700;
       background: var(--tile-empty-bg);
       color: var(--text-main);
@@ -298,44 +292,37 @@
     }
 
     .pool-wrapper {
-      margin-top: 4px;
-      padding-top: 6px;
+      margin-top: 6px;
+      padding-top: 8px;
       border-top: 1px dashed #334155;
-      flex: 1 1 auto;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
     }
 
     .pool-title {
-      font-size: 11px;
-      margin-bottom: 4px;
+      font-size: 12px;
+      margin-bottom: 6px;
       color: #e5e7eb;
-      flex-shrink: 0;
     }
 
     .char-pool {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 6px 8px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px 12px;
       justify-content: center;
-      flex: 1 1 auto;
-      align-content: start;
     }
 
     .char-btn {
-      padding: 6px 0;
+      padding: 8px 0;
       border-radius: 10px;
       border: 1px solid #9ca3af;
       background: radial-gradient(circle at top, #0f172a, #020617 70%);
       color: #f9fafb;
-      font-size: clamp(18px, 4.6vw, 22px);
+      font-size: 22px;
       font-weight: 700;
       text-align: center;
       cursor: pointer;
       transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
       user-select: none;
-      min-height: 44px;
+      min-height: 56px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -346,15 +333,7 @@
       box-shadow: none;
     }
 
-    .char-btn.used {
-      background: #4b5563;
-      border-color: #6b7280;
-      color: #9ca3af;
-      cursor: default;
-      box-shadow: none;
-      transform: none;
-    }
-
+    /* 選過，但不在答案裡的字：灰色且不可再選 */
     .char-btn.absent-global {
       background: #020617;
       border-color: #4b5563;
@@ -363,6 +342,13 @@
       box-shadow: none;
       transform: none;
       pointer-events: none;
+    }
+
+    /* 選過，且在答案裡的字：變成綠色，但仍可點擊 */
+    .char-btn.used-correct {
+      background: #14532d;
+      border-color: #16a34a;
+      color: #bbf7d0;
     }
 
     .char-btn.disabled {
@@ -376,12 +362,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 6px;
+      margin-top: 10px;
       gap: 8px;
       flex-wrap: wrap;
-      flex-shrink: 0;
-      padding-top: 4px;
-      border-top: 1px dashed #334155;
     }
 
     .controls-left {
@@ -399,10 +382,10 @@
 
     .center-message {
       text-align: center;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 900;
       color: #f97316;
-      margin-top: 4px;
+      margin-top: 6px;
       opacity: 0;
       transform: translateY(4px);
       transition: opacity 0.25s ease-out, transform 0.25s ease-out;
@@ -455,24 +438,24 @@
       border-radius: 16px;
       padding: 18px 16px 14px;
       border: 1px solid #1f2937;
-      max-width: 360px;
+      max-width: 340px;
       width: 92%;
       text-align: left;
       box-shadow: 0 18px 45px rgba(0, 0, 0, 0.85);
     }
 
     .modal-title {
-      font-size: 22px;
-      font-weight: 800;
-      margin-bottom: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
       text-align: center;
     }
 
     .modal-body {
-      font-size: 15px;
-      margin-bottom: 12px;
+      font-size: 13px;
+      margin-bottom: 10px;
       color: #e5e7eb;
-      line-height: 1.8;
+      line-height: 1.7;
     }
 
     .modal-body ul {
@@ -488,82 +471,58 @@
       display: flex;
       justify-content: center;
       gap: 10px;
-      margin-top: 10px;
+      margin-top: 8px;
       flex-wrap: wrap;
     }
 
     .highlight-correct { color: #4ade80; font-weight: 600; }
     .highlight-present { color: #facc15; font-weight: 600; }
 
-    .modal-share-certificate {
-      background: rgba(2, 6, 23, 0.9);
-      border-radius: 16px;
-      padding: 10px 12px;
-      border: 1px dashed #f97316;
-      margin-top: 10px;
-      font-size: 12px;
-      color: #e5e7eb;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .modal-share-certificate::before,
-    .modal-share-certificate::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      border: 1px solid rgba(251, 191, 36, 0.4);
-      pointer-events: none;
-    }
-
-    .modal-share-certificate::before {
-      inset: 3px;
-    }
-
-    .modal-share-certificate::after {
-      inset: 6px;
-      border-style: dotted;
-      opacity: 0.6;
-    }
-
-    .modal-share-certificate h4 {
-      margin-bottom: 4px;
+    /* 結束視窗統計資訊 */
+    .end-stats {
       font-size: 13px;
-      color: #fbbf24;
-      font-weight: 700;
-      position: relative;
-      z-index: 1;
+      line-height: 1.6;
+      margin-top: 4px;
     }
 
-    .modal-share-certificate p {
-      position: relative;
-      z-index: 1;
-    }
-
-    /* 橫向螢幕不支援提示 */
-    .orientation-overlay {
-      position: fixed;
-      inset: 0;
-      background: #020617;
-      color: #e5e7eb;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 24px;
-      z-index: 50;
-    }
-
-    .orientation-overlay.show {
+    .end-stats-row {
       display: flex;
+      justify-content: space-between;
+      margin-top: 2px;
     }
 
-    .orientation-message {
-      max-width: 320px;
-      font-size: 16px;
-      line-height: 1.7;
-      font-weight: 600;
+    /* 橫向模式提示（僅手機） */
+    .orientation-warning {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15,23,42,0.95);
+      color: #fbbf24;
+      border-top: 1px solid #4b5563;
+      padding: 8px 12px;
+      font-size: 12px;
+      text-align: center;
+      z-index: 50;
+      display: none;
+      white-space: nowrap;
+    }
+
+    .orientation-warning.show {
+      display: block;
+    }
+
+    /* 證書 canvas 容器 */
+    .certificate-wrapper {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .certificate-canvas {
+      max-width: 100%;
+      border-radius: 12px;
+      border: 1px solid #4b5563;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.7);
     }
 
     @media (max-width: 400px) {
@@ -571,29 +530,19 @@
         --tile-size: 56px;
       }
       .title { font-size: 16px; }
-      .char-btn { font-size: 18px; min-height: 40px; }
+      .char-btn { font-size: 20px; min-height: 52px; }
       .main-panel { padding-inline: 8px; }
     }
 
     @media (max-height: 640px) {
       .board-wrapper {
-        padding-block: 6px;
-        height: calc(100vh - 60px);
+        padding-block: 10px;
       }
-      .board {
-        flex-basis: 30%;
+      .pool-wrapper {
+        margin-top: 4px;
       }
       .char-btn {
-        min-height: 40px;
-      }
-    }
-
-    @media (min-width: 768px) and (min-height: 700px) {
-      body {
-        align-items: center;
-      }
-      .game-shell {
-        max-height: 720px;
+        min-height: 50px;
       }
     }
   </style>
@@ -601,16 +550,23 @@
 <body>
   <div class="toast" id="toast"></div>
 
+  <!-- 遊戲結束視窗 -->
   <div class="overlay" id="end-overlay">
     <div class="modal">
       <div class="modal-title" id="end-title"></div>
       <div class="modal-body" id="end-body"></div>
-      <div class="modal-actions" id="end-actions">
+      <div class="end-stats" id="end-stats"></div>
+      <div class="certificate-wrapper" id="certificate-wrapper" style="display:none;">
+        <canvas id="certificate-canvas" class="certificate-canvas" width="600" height="800"></canvas>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-wide" id="btn-share">分享</button>
         <button class="btn btn-primary btn-wide" id="btn-retry">再玩一次</button>
       </div>
     </div>
   </div>
 
+  <!-- 開場說明彈窗 -->
   <div class="overlay show" id="start-overlay">
     <div class="modal">
       <div class="modal-title">成語猜謎</div>
@@ -628,6 +584,7 @@
     </div>
   </div>
 
+  <!-- 遊戲規則彈窗 -->
   <div class="overlay" id="rules-overlay">
     <div class="modal">
       <div class="modal-title">遊戲規則</div>
@@ -639,6 +596,7 @@
           <li><span class="highlight-correct">綠色</span>：字和<strong>位置</strong>都正確。</li>
           <li><span class="highlight-present">土黃色</span>：字有出現在答案中，但<strong>位置不對</strong>。</li>
           <li>灰色：這個字沒有出現在答案中。</li>
+          <li>每題有四次猜謎機會。</li>   
         </ul>
         <p style="margin-top:6px;">連續答對多題可以升級，挑戰更困難的成語！</p>
       </div>
@@ -662,7 +620,7 @@
     <main class="main-panel">
       <section class="board-wrapper" id="board-wrapper">
         <div class="info-row">
-          <div class="instructions-text">請從下方選字，依序填入上方空格：</div>
+          <div class="status-text" id="status-text"></div>
           <div class="attempts" id="attempts-text"></div>
         </div>
 
@@ -671,10 +629,9 @@
             等級：
             <span class="level-badge" id="level-badge">小學生</span>
           </div>
+          <div class="promotion-message" id="promotion-message"></div>
           <div class="level-progress">本級已答對 <strong id="level-correct">0</strong> 題</div>
         </div>
-
-        <div class="status-text" id="status-text"></div>
 
         <div class="board" id="board"></div>
         <div class="center-message" id="center-message">正確答案</div>
@@ -686,7 +643,7 @@
 
         <div class="controls">
           <div class="controls-left">
-            <button class="btn btn-small btn-ghost" id="btn-undo"><span class="btn-undo-icon">⌫</span> 倒退一格</button>
+            <button class="btn btn-small btn-ghost" id="btn-undo"><span class="btn-undo-icon">⌫</span> 退回一格</button>
           </div>
           <div class="controls-right">
             <button class="btn btn-primary" id="btn-submit">送出答案</button>
@@ -696,11 +653,7 @@
     </main>
   </div>
 
-  <div class="orientation-overlay" id="orientation-overlay">
-    <div class="orientation-message">遊戲顯示不支援橫向螢幕，請將手機轉回直立。</div>
-  </div>
-
-  <canvas id="share-canvas" width="600" height="450" style="display:none;"></canvas>
+  <div class="orientation-warning" id="orientation-warning">遊戲顯示不支援橫向螢幕，請將手機轉回直立螢幕</div>
 
   <script>
     const LEVELS = [
@@ -720,9 +673,13 @@
     const toastEl = document.getElementById('toast');
     const levelBadgeEl = document.getElementById('level-badge');
     const levelCorrectEl = document.getElementById('level-correct');
+    const promotionMessageEl = document.getElementById('promotion-message');
     const endOverlayEl = document.getElementById('end-overlay');
     const endTitleEl = document.getElementById('end-title');
     const endBodyEl = document.getElementById('end-body');
+    const endStatsEl = document.getElementById('end-stats');
+    const certificateWrapperEl = document.getElementById('certificate-wrapper');
+    const certificateCanvas = document.getElementById('certificate-canvas');
     const boardWrapperEl = document.getElementById('board-wrapper');
     const centerMessageEl = document.getElementById('center-message');
 
@@ -736,10 +693,9 @@
     const btnSubmit = document.getElementById('btn-submit');
     const btnUndo = document.getElementById('btn-undo');
     const btnRetry = document.getElementById('btn-retry');
-    const endActionsEl = document.getElementById('end-actions');
+    const btnShare = document.getElementById('btn-share');
 
-    const shareCanvas = document.getElementById('share-canvas');
-    const orientationOverlay = document.getElementById('orientation-overlay');
+    const orientationWarningEl = document.getElementById('orientation-warning');
 
     let ALL_CHARS = '';
     let idiomData = null;
@@ -755,8 +711,14 @@
     let levelCorrectCount = 0;
     let solvedIdioms = [];
 
+    // 統計資料
     let totalQuestions = 0;
-    let totalCorrect = 0;
+    let totalAttempts = 0;
+    let gameStartTime = null;
+    let gameEndTime = null;
+
+    // 證書背景暫存
+    let lastSolvedBoardSnapshot = null;
 
     function showToast(msg, duration = 1500) {
       toastEl.textContent = msg;
@@ -767,67 +729,9 @@
       }, duration);
     }
 
-    function openEndOverlay(title, bodyHtml, showShare = false, allCleared = false, isWrongAnswer = false) {
+    function openEndOverlay(title, body) {
       endTitleEl.textContent = title;
-      endBodyEl.innerHTML = bodyHtml;
-
-      endActionsEl.innerHTML = '';
-
-      if (showShare && !isWrongAnswer) {
-        const btnShare = document.createElement('button');
-        btnShare.className = 'btn btn-ghost btn-wide';
-        btnShare.textContent = '分享';
-        btnShare.id = 'btn-share';
-        btnShare.addEventListener('click', async () => {
-          try {
-            const url = await generateCertificateImage();
-            if (navigator.share) {
-              try {
-                const res = await fetch(url);
-                const blob = await res.blob();
-                const file = new File([blob], 'chengyu-wordle-certificate.png', { type: 'image/png' });
-                await navigator.share({
-                  files: [file],
-                  title: '成語 Wordle 證書',
-                  text: '我的成語能力認證卡'
-                });
-              } catch (err) {
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = 'chengyu-wordle-certificate.png';
-                link.click();
-                showToast('成語 Wordle 證書，可手動分享或儲存。', 2500);
-              }
-            } else {
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = 'chengyu-wordle-certificate.png';
-              link.click();
-              showToast('成語 Wordle 證書，可手動分享或儲存。', 2500);
-            }
-          } catch (err) {
-            console.error(err);
-            showToast('產生證書圖片時發生錯誤。', 2000);
-          }
-        });
-        endActionsEl.appendChild(btnShare);
-      }
-
-      const btnRetryClone = btnRetry.cloneNode(true);
-      btnRetryClone.id = 'btn-retry';
-      btnRetryClone.addEventListener('click', () => {
-        restartGame();
-        hideStartOverlay();
-      });
-      endActionsEl.appendChild(btnRetryClone);
-
-      if (allCleared && !isWrongAnswer) {
-        const extra = document.createElement('div');
-        extra.className = 'modal-share-certificate';
-        extra.innerHTML = '<h4>恭喜破關！</h4><p>你已完成所有等級的成語挑戰，快用上方「分享」按鈕，把你的成就秀給朋友看吧！</p>';
-        endBodyEl.appendChild(extra);
-      }
-
+      endBodyEl.textContent = body;
       endOverlayEl.classList.add('show');
     }
 
@@ -867,10 +771,6 @@
 
     function updateAttemptsText() {
       attemptsTextEl.textContent = '';
-    }
-
-    function getCurrentLevelName() {
-      return LEVELS[currentLevelIndex].name;
     }
 
     function updateLevelUI() {
@@ -972,37 +872,33 @@
       return Array.from(poolEl.querySelectorAll(`.char-btn[data-char="${ch}"]`));
     }
 
-    function markAbsentChars(guess) {
+    // 更新選字區狀態：
+    // - 選過且不在答案裡的字 => absent-global（灰色不可選）
+    // - 選過且在答案裡的字 => used-correct（綠色但可再選）
+    function markPoolCharsAfterGuess(guess) {
       const answerChars = answer.split('');
-
-      const remaining = {};
-      answerChars.forEach((ch, i) => {
-        const g = guess[i];
-        if (g === ch) {
+      const uniqueGuess = Array.from(new Set(guess.split('')));
+      uniqueGuess.forEach(ch => {
+        const buttons = getCharButtonsByChar(ch);
+        if (!buttons.length) return;
+        if (!answerChars.includes(ch)) {
+          buttons.forEach(btn => {
+            btn.classList.add('absent-global');
+            btn.classList.remove('used-correct');
+          });
         } else {
-          remaining[ch] = (remaining[ch] || 0) + 1;
+          buttons.forEach(btn => {
+            if (!btn.classList.contains('absent-global')) {
+              btn.classList.add('used-correct');
+            }
+          });
         }
       });
-
-      const usedCount = {};
-      for (let i = 0; i < COLS; i++) {
-        const ch = guess[i];
-        if (!answerChars.includes(ch)) {
-          const buttons = getCharButtonsByChar(ch);
-          buttons.forEach(btn => btn.classList.add('absent-global'));
-        } else {
-          usedCount[ch] = (usedCount[ch] || 0) + 1;
-          if (!remaining[ch] && guess[i] !== answerChars[i]) {
-            const buttons = getCharButtonsByChar(ch);
-            buttons.forEach(btn => btn.classList.add('used'));
-          }
-        }
-      }
     }
 
     function onCharClick(ch, btn) {
       if (gameOver || waitingForClickToContinue) return;
-      if (btn.classList.contains('used') || btn.classList.contains('disabled') || btn.classList.contains('absent-global')) return;
+      if (btn.classList.contains('disabled') || btn.classList.contains('absent-global')) return;
       if (currentCol >= COLS) {
         const rowTiles = getRowTiles(currentRow);
         rowTiles.forEach(t => t.classList.add('shake'));
@@ -1063,8 +959,6 @@
         tile.classList.remove('filled', 'correct', 'present', 'absent');
         tile.classList.add(result[i]);
       });
-
-      markAbsentChars(guess);
     }
 
     function showCenterMessage() {
@@ -1087,45 +981,229 @@
       hideCenterMessage();
       setInputEnabled(true);
       btnSubmit.textContent = '送出答案';
+      promotionMessageEl.textContent = '';
     }
 
     function getCurrentLevelLabel() {
       return LEVELS[currentLevelIndex].name;
     }
 
+    function getAbilityLabelByLevelIndex(idx) {
+      return LEVELS[idx].name;
+    }
+
+    function formatDuration(ms) {
+      const totalSec = Math.floor(ms / 1000);
+      const min = Math.floor(totalSec / 60);
+      const sec = totalSec % 60;
+      if (min === 0) return sec + ' 秒';
+      return min + ' 分 ' + sec + ' 秒';
+    }
+
+    function handleGameEnd(success) {
+      gameOver = true;
+      gameEndTime = Date.now();
+      const durationMs = gameStartTime ? (gameEndTime - gameStartTime) : 0;
+      const percent = totalAttempts ? Math.round((totalQuestions / totalAttempts) * 100) : 0;
+      const ability = getAbilityLabelByLevelIndex(currentLevelIndex);
+
+      const title = success ? '恭喜破關，你是成語達人' : '答案錯誤，遊戲結束';
+      const body = '成語能力：' + ability;
+      const statsHtml = `
+        <div>答對題數：${totalQuestions} 題</div>
+        <div>答題正確率：${percent}% （答對率算法：總答題數 / 總嘗試猜題次數）</div>
+        <div>總共花費時間：${formatDuration(durationMs)}</div>
+      `;
+      endStatsEl.innerHTML = statsHtml;
+      openEndOverlay(title, body);
+    }
+
+    // 儲存最後一題成功時的盤面，作為證書背景
+    function snapshotBoard() {
+      try {
+        const rect = boardWrapperEl.getBoundingClientRect();
+        lastSolvedBoardSnapshot = {
+          width: rect.width,
+          height: rect.height,
+          bgColor: getComputedStyle(boardWrapperEl).backgroundColor
+        };
+      } catch (e) {
+        console.warn('snapshotBoard failed', e);
+      }
+    }
+
+    function drawCertificate() {
+      if (!certificateCanvas) return;
+      const ctx = certificateCanvas.getContext('2d');
+      const w = certificateCanvas.width;
+      const h = certificateCanvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // 背景：使用遊戲盤面色系做抽象背景
+      const bgGradient = ctx.createLinearGradient(0, 0, 0, h);
+      bgGradient.addColorStop(0, '#020617');
+      bgGradient.addColorStop(0.4, '#0f172a');
+      bgGradient.addColorStop(1, '#020617');
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, w, h);
+
+      // 模擬一塊微透亮的盤面區塊
+      const boardX = 60;
+      const boardY = 80;
+      const boardW = w - 120;
+      const boardH = 260;
+      ctx.fillStyle = 'rgba(15,23,42,0.9)';
+      ctx.strokeStyle = '#1f2937';
+      ctx.lineWidth = 2;
+      ctx.roundRect(boardX, boardY, boardW, boardH, 20);
+      ctx.fill();
+      ctx.stroke();
+
+      // 畫 4x4 tile 作為背景圖樣
+      const tileSize = 56;
+      const gap = 8;
+      const startX = boardX + (boardW - (tileSize * 4 + gap * 3)) / 2;
+      const startY = boardY + (boardH - (tileSize * 4 + gap * 3)) / 2;
+      const tileColors = ['#16a34a', '#eab308', '#4b5563'];
+
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          const x = startX + c * (tileSize + gap);
+          const y = startY + r * (tileSize + gap);
+          const color = tileColors[(r * 4 + c) % tileColors.length];
+          ctx.fillStyle = color;
+          ctx.strokeStyle = '#020617';
+          ctx.lineWidth = 2;
+          ctx.roundRect(x, y, tileSize, tileSize, 10);
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+
+      // 標題
+      ctx.fillStyle = '#f97316';
+      ctx.font = 'bold 32px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('成語 WORDLE 證書', w / 2, boardY + boardH + 60);
+
+      // 分隔線
+      ctx.strokeStyle = '#4b5563';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(80, boardY + boardH + 80);
+      ctx.lineTo(w - 80, boardY + boardH + 80);
+      ctx.stroke();
+
+      const ability = getAbilityLabelByLevelIndex(currentLevelIndex);
+      const percent = totalAttempts ? Math.round((totalQuestions / totalAttempts) * 100) : 0;
+      const durationMs = gameStartTime && gameEndTime ? (gameEndTime - gameStartTime) : 0;
+
+      ctx.fillStyle = '#e5e7eb';
+      ctx.font = '18px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.textAlign = 'left';
+
+      const baseY = boardY + boardH + 115;
+      const lineH = 28;
+      ctx.fillText('成語能力：' + ability, 80, baseY);
+      ctx.fillText('答對題數：' + totalQuestions + ' 題', 80, baseY + lineH);
+      ctx.fillText('答題正確率：' + percent + '%', 80, baseY + lineH * 2);
+      ctx.fillText('總共花費時間：' + formatDuration(durationMs), 80, baseY + lineH * 3);
+
+      // 裝飾圈
+      ctx.strokeStyle = 'rgba(248,113,22,0.7)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(w - 120, baseY + lineH * 1.5, 46, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#22c55e';
+      ctx.font = 'bold 20px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('CLEAR', w - 120, baseY + lineH * 1.5 + 8);
+
+      certificateWrapperEl.style.display = 'block';
+    }
+
+    async function shareCertificate() {
+      try {
+        drawCertificate();
+        if (!certificateCanvas) return;
+
+        const dataUrl = certificateCanvas.toDataURL('image/png');
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], 'chengyu-wordle-certificate.png', { type: 'image/png' });
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: '成語 Wordle 證書',
+            text: '來看看我的成語 Wordle 成績！',
+            files: [file]
+          });
+        } else {
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = 'chengyu-wordle-certificate.png';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          showToast('已產生證書圖片，可儲存到相簿或分享。', 2000);
+        }
+      } catch (e) {
+        console.error(e);
+        showToast('分享失敗，請稍後再試。', 2000);
+      }
+    }
+
+    function showCenterMessage() {
+      centerMessageEl.classList.add('show');
+    }
+
+    function hideCenterMessage() {
+      centerMessageEl.classList.remove('show');
+    }
+
+    function enterNextQuestionMode() {
+      waitingForClickToContinue = true;
+      setInputEnabled(false);
+      showCenterMessage();
+      btnSubmit.textContent = '下一題';
+    }
+
+    function exitNextQuestionMode() {
+      waitingForClickToContinue = false;
+      hideCenterMessage();
+      setInputEnabled(true);
+      btnSubmit.textContent = '送出答案';
+      promotionMessageEl.textContent = '';
+    }
+
     function handleCorrectAnswer() {
       levelCorrectCount++;
-      totalCorrect++;
       solvedIdioms.push(answer);
+      totalQuestions++;
 
       const finishedAllLevels = (currentLevelIndex === LEVELS.length - 1 && levelCorrectCount >= 5);
       if (finishedAllLevels) {
         updateLevelUI();
-        gameOver = true;
-        showCenterMessage();
+        statusTextEl.textContent = '';
+        snapshotBoard();
+        handleGameEnd(true);
         btnSubmit.disabled = true;
         setInputEnabled(false);
-
-        const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
-        const levelName = getCurrentLevelLabel();
-        const extraLine = '<p style="margin-top:6px;color:#fbbf24;font-weight:700;">恭喜破關！</p>';
-        const summary = `<p>成語能力：${levelName}</p><p>答題結果：共答對 ${totalCorrect} 題，正確率 ${accuracy}%</p>` + extraLine;
-
-        openEndOverlay('成語能力總結', summary, true, true, false);
         return;
       }
 
       if (levelCorrectCount >= 5) {
         currentLevelIndex++;
         levelCorrectCount = 0;
-        statusTextEl.textContent = `升級為「${LEVELS[currentLevelIndex].name}」！`;
-        statusTextEl.classList.add('level-up');
-      } else {
-        statusTextEl.textContent = '';
-        statusTextEl.classList.remove('level-up');
+        promotionMessageEl.textContent = `恭喜你升級至「${LEVELS[currentLevelIndex].name}」！`;
       }
 
       updateLevelUI();
+      statusTextEl.textContent = '';
+      snapshotBoard();
       enterNextQuestionMode();
     }
 
@@ -1133,8 +1211,6 @@
       if (gameOver) return;
 
       if (waitingForClickToContinue) {
-        statusTextEl.textContent = '';
-        statusTextEl.classList.remove('level-up');
         exitNextQuestionMode();
         newRound();
         return;
@@ -1150,20 +1226,18 @@
 
       const guess = boardState[currentRow].join('');
       colorRow(currentRow, guess);
-
-      if (!answer) return;
+      markPoolCharsAfterGuess(guess);
+      totalAttempts++;
 
       if (guess === answer) {
-        totalQuestions++;
         handleCorrectAnswer();
         return;
       }
 
       currentRow++;
       if (currentRow >= ROWS) {
-        totalQuestions++;
-        gameOver = true;
-        openEndOverlay('答案錯誤，遊戲結束', `<p>答案錯誤，遊戲結束。</p>`, false, false, true);
+        statusTextEl.textContent = `Game Over，正確答案是：${answer}`;
+        handleGameEnd(false);
       } else {
         currentCol = 0;
         updateAttemptsText();
@@ -1181,7 +1255,6 @@
       gameOver = false;
       hideCenterMessage();
       statusTextEl.textContent = '';
-      statusTextEl.classList.remove('level-up');
       initBoard();
       buildCharPool();
       updateAttemptsText();
@@ -1193,7 +1266,11 @@
       levelCorrectCount = 0;
       solvedIdioms = [];
       totalQuestions = 0;
-      totalCorrect = 0;
+      totalAttempts = 0;
+      gameStartTime = Date.now();
+      gameEndTime = null;
+      lastSolvedBoardSnapshot = null;
+      promotionMessageEl.textContent = '';
       closeEndOverlay();
       updateLevelUI();
       exitNextQuestionMode();
@@ -1215,97 +1292,27 @@
       }
     }
 
-    function generateCertificateImage() {
-      return new Promise((resolve, reject) => {
-        try {
-          const canvas = shareCanvas;
-          const ctx = canvas.getContext('2d');
-          const w = canvas.width;
-          const h = canvas.height;
-
-          ctx.fillStyle = '#111827';
-          ctx.fillRect(0, 0, w, h);
-
-          const grad = ctx.createLinearGradient(0, 0, 0, h);
-          grad.addColorStop(0, '#111827');
-          grad.addColorStop(0.5, '#020617');
-          grad.addColorStop(1, '#111827');
-          ctx.fillStyle = grad;
-          ctx.fillRect(16, 16, w - 32, h - 32);
-
-          ctx.strokeStyle = '#fbbf24';
-          ctx.lineWidth = 2.5;
-          ctx.strokeRect(24, 24, w - 48, h - 48);
-
-          ctx.strokeStyle = 'rgba(248, 113, 22, 0.8)';
-          ctx.lineWidth = 1.5;
-          ctx.setLineDash([6, 4]);
-          ctx.strokeRect(32, 32, w - 64, h - 64);
-          ctx.setLineDash([]);
-
-          ctx.fillStyle = '#fbbf24';
-          ctx.font = 'bold 28px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('成語 WORDLE 認證', w / 2, 70);
-
-          ctx.fillStyle = '#e5e7eb';
-          ctx.font = '16px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          ctx.fillText('成語能力證書', w / 2, 100);
-
-          const levelName = getCurrentLevelLabel();
-          const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
-
-          ctx.textAlign = 'left';
-          ctx.fillStyle = '#fbbf24';
-          ctx.font = 'bold 20px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          ctx.fillText('達成等級：' + levelName, 60, 150);
-
-          ctx.fillStyle = '#e5e7eb';
-          ctx.font = '16px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          ctx.fillText('總答題數：' + totalQuestions + ' 題', 60, 190);
-          ctx.fillText('答對題數：' + totalCorrect + ' 題', 60, 220);
-          ctx.fillText('正確率：' + accuracy + '%', 60, 250);
-
-          ctx.fillStyle = '#9ca3af';
-          ctx.font = '13px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          ctx.fillText('（分享這張證書，讓朋友看看你的成語實力！）', 60, 285);
-
-          const now = new Date();
-          const dateStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
-          ctx.textAlign = 'right';
-          ctx.fillStyle = '#6b7280';
-          ctx.font = '12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          ctx.fillText('日期：' + dateStr, w - 60, h - 50);
-
-          ctx.textAlign = 'center';
-          ctx.fillStyle = '#4b5563';
-          ctx.font = '12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          ctx.fillText('成語 Wordle 小遊戲', w / 2, h - 28);
-
-          const url = canvas.toDataURL('image/png');
-          resolve(url);
-        } catch (err) {
-          reject(err);
-        }
-      });
-    }
-
-    function checkOrientation() {
+    function handleOrientationChange() {
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+      if (!isMobile) {
+        orientationWarningEl.classList.remove('show');
+        return;
+      }
       const isLandscape = window.matchMedia('(orientation: landscape)').matches || window.innerWidth > window.innerHeight;
       if (isLandscape) {
-        orientationOverlay.classList.add('show');
+        orientationWarningEl.classList.add('show');
       } else {
-        orientationOverlay.classList.remove('show');
+        orientationWarningEl.classList.remove('show');
       }
     }
 
     btnSubmit.addEventListener('click', submitRow);
     btnUndo.addEventListener('click', undoChar);
-
     btnRetry.addEventListener('click', () => {
       restartGame();
       hideStartOverlay();
     });
+    btnShare.addEventListener('click', shareCertificate);
 
     btnStartGame.addEventListener('click', () => {
       hideStartOverlay();
@@ -1313,6 +1320,7 @@
         showToast('題庫載入中，請稍後再試。');
         return;
       }
+      gameStartTime = Date.now();
       newRound();
     });
 
@@ -1338,24 +1346,12 @@
       }
     });
 
-    document.addEventListener('gesturestart', function (e) {
-      e.preventDefault();
-    });
-
-    document.addEventListener('gesturechange', function (e) {
-      e.preventDefault();
-    });
-
-    document.addEventListener('gestureend', function (e) {
-      e.preventDefault();
-    });
-
-    window.addEventListener('orientationchange', checkOrientation);
-    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', handleOrientationChange);
+    window.addEventListener('resize', handleOrientationChange);
 
     updateLevelUI();
     loadIdiomData();
-    checkOrientation();
+    handleOrientationChange();
   </script>
 </body>
 </html>
