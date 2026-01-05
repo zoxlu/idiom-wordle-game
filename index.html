@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>成語猜謎遊戲 - 手機版</title>
+  <title>成語猜謎 </title>
   <style>
     :root {
       --bg-color: #020617;
@@ -82,8 +82,31 @@
 
     .top-actions {
       display: flex;
-      gap: 6px;
       align-items: center;
+      gap: 6px;
+      margin-left: 8px;
+      flex-shrink: 0;
+    }
+
+    .promotion-wrapper {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 0 4px;
+    }
+
+    .promotion-message-top {
+      font-size: 11px;
+      line-height: 1.2;
+      color: #fed7aa;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .promotion-message-top strong {
+      display: block;
+      font-size: 12px;
+      color: #fb923c;
     }
 
     button {
@@ -149,6 +172,12 @@
     .btn-undo-icon {
       font-size: 18px;
       line-height: 1;
+    }
+
+    .btn-icon-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .main-panel {
@@ -218,6 +247,15 @@
       color: #fb923c;
       text-align: center;
       min-width: 0;
+    }
+
+    .promotion-message-line1 {
+      display: block;
+    }
+
+    .promotion-message-line2 {
+      display: block;
+      margin-top: 2px;
     }
 
     .level-progress {
@@ -436,7 +474,7 @@
     .modal {
       background: #020617;
       border-radius: 16px;
-      padding: 18px 16px 14px;
+      padding: 18px 16px 18px;
       border: 1px solid #1f2937;
       max-width: 340px;
       width: 92%;
@@ -445,17 +483,17 @@
     }
 
     .modal-title {
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 700;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       text-align: center;
     }
 
     .modal-body {
-      font-size: 13px;
-      margin-bottom: 10px;
+      font-size: 14px;
+      margin-bottom: 12px;
       color: #e5e7eb;
-      line-height: 1.7;
+      line-height: 1.8;
     }
 
     .modal-body ul {
@@ -464,14 +502,14 @@
     }
 
     .modal-body li + li {
-      margin-top: 3px;
+      margin-top: 4px;
     }
 
     .modal-actions {
       display: flex;
       justify-content: center;
       gap: 10px;
-      margin-top: 8px;
+      margin-top: 10px;
       flex-wrap: wrap;
     }
 
@@ -480,15 +518,15 @@
 
     /* 結束視窗統計資訊 */
     .end-stats {
-      font-size: 13px;
-      line-height: 1.6;
-      margin-top: 4px;
+      font-size: 14px;
+      line-height: 1.8;
+      margin-top: 6px;
     }
 
     .end-stats-row {
       display: flex;
       justify-content: space-between;
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
     /* 橫向模式提示（僅手機） */
@@ -532,6 +570,8 @@
       .title { font-size: 16px; }
       .char-btn { font-size: 20px; min-height: 52px; }
       .main-panel { padding-inline: 8px; }
+      .promotion-message-top { font-size: 10px; }
+      .promotion-message-top strong { font-size: 11px; }
     }
 
     @media (max-height: 640px) {
@@ -559,8 +599,12 @@
       <div class="certificate-wrapper" id="certificate-wrapper" style="display:none;">
         <canvas id="certificate-canvas" class="certificate-canvas" width="600" height="800"></canvas>
       </div>
+      <div style="height: 8px;"></div>
       <div class="modal-actions">
-        <button class="btn btn-ghost btn-wide" id="btn-share">分享</button>
+        <button class="btn btn-ghost btn-wide btn-icon-left" id="btn-share">
+          <span style="font-size:14px;">⇪</span>
+          <span>分享</span>
+        </button>
         <button class="btn btn-primary btn-wide" id="btn-retry">再玩一次</button>
       </div>
     </div>
@@ -596,7 +640,7 @@
           <li><span class="highlight-correct">綠色</span>：字和<strong>位置</strong>都正確。</li>
           <li><span class="highlight-present">土黃色</span>：字有出現在答案中，但<strong>位置不對</strong>。</li>
           <li>灰色：這個字沒有出現在答案中。</li>
-          <li>每題有四次猜謎機會。</li>   
+          <li>每題有四次猜謎機會。</li>
         </ul>
         <p style="margin-top:6px;">連續答對多題可以升級，挑戰更困難的成語！</p>
       </div>
@@ -611,6 +655,12 @@
       <div class="title-group">
         <div class="title">成語猜謎</div>
         <div class="subtitle">四字成語版 Wordle</div>
+      </div>
+      <div class="promotion-wrapper">
+        <div class="promotion-message-top" id="promotion-message-top" style="display:none;">
+          <span class="promotion-message-line1">恭喜你升級至：</span>
+          <strong class="promotion-message-line2" id="promotion-message-top-level"></strong>
+        </div>
       </div>
       <div class="top-actions">
         <button class="btn btn-small btn-ghost" id="btn-open-rules">遊戲規則</button>
@@ -674,6 +724,8 @@
     const levelBadgeEl = document.getElementById('level-badge');
     const levelCorrectEl = document.getElementById('level-correct');
     const promotionMessageEl = document.getElementById('promotion-message');
+    const promotionMessageTopEl = document.getElementById('promotion-message-top');
+    const promotionMessageTopLevelEl = document.getElementById('promotion-message-top-level');
     const endOverlayEl = document.getElementById('end-overlay');
     const endTitleEl = document.getElementById('end-title');
     const endBodyEl = document.getElementById('end-body');
@@ -719,6 +771,7 @@
 
     // 證書背景暫存
     let lastSolvedBoardSnapshot = null;
+    let certificateBgImage = null;
 
     function showToast(msg, duration = 1500) {
       toastEl.textContent = msg;
@@ -874,7 +927,7 @@
 
     // 更新選字區狀態：
     // - 選過且不在答案裡的字 => absent-global（灰色不可選）
-    // - 選過且在答案裡的字 => used-correct（綠色但可再選）
+    // - 選過且在答案裡的字   => used-correct（綠色但可再選）
     function markPoolCharsAfterGuess(guess) {
       const answerChars = answer.split('');
       const uniqueGuess = Array.from(new Set(guess.split('')));
@@ -1010,11 +1063,12 @@
       const title = success ? '恭喜破關，你是成語達人' : '答案錯誤，遊戲結束';
       const body = '成語能力：' + ability;
       const statsHtml = `
-        <div>答對題數：${totalQuestions} 題</div>
-        <div>答題正確率：${percent}% （答對率算法：總答題數 / 總嘗試猜題次數）</div>
-        <div>總共花費時間：${formatDuration(durationMs)}</div>
+        <div>答對題目：${totalQuestions} 題</div>
+        <div>答題正確率：${percent}%</div>
+        <div>總答題時間：${formatDuration(durationMs)}</div>
       `;
       endStatsEl.innerHTML = statsHtml;
+      drawCertificate();
       openEndOverlay(title, body);
     }
 
@@ -1032,7 +1086,107 @@
       }
     }
 
-    function drawCertificate() {
+    function ensureCertificateBgLoaded() {
+      return new Promise(resolve => {
+        if (certificateBgImage && certificateBgImage.complete) {
+          resolve(certificateBgImage);
+          return;
+        }
+        if (!certificateBgImage) {
+          certificateBgImage = new Image();
+          certificateBgImage.src = './data/certificate_bg.png';
+          certificateBgImage.onload = () => resolve(certificateBgImage);
+          certificateBgImage.onerror = () => resolve(null);
+        } else {
+          certificateBgImage.onload = () => resolve(certificateBgImage);
+          certificateBgImage.onerror = () => resolve(null);
+        }
+      });
+    }
+
+    function drawCertificateTextLayer(ctx, w, h) {
+      const percent = totalAttempts ? Math.round((totalQuestions / totalAttempts) * 100) : 0;
+      const durationMs = gameStartTime && gameEndTime ? (gameEndTime - gameStartTime) : 0;
+      const ability = getAbilityLabelByLevelIndex(currentLevelIndex);
+
+      // 主標題
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 34px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('成語 WORDLE 證書', w / 2, h * 0.23);
+
+      // 等級與數據
+      ctx.textAlign = 'left';
+      const leftX = w * 0.18;
+      let y = h * 0.30;
+      const lh = 34;
+
+      ctx.font = '600 20px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = '#bef264';
+      ctx.fillText('等級：' + ability, leftX, y);
+      y += lh;
+      ctx.fillStyle = '#fde68a';
+      ctx.fillText('答對題目：' + totalQuestions + ' 題', leftX, y);
+      y += lh;
+      ctx.fillText('答題正確率：' + percent + '%', leftX, y);
+      y += lh;
+      ctx.fillText('總答題時間：' + formatDuration(durationMs), leftX, y);
+
+      // 日期
+      const date = new Date();
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      const dateText = `${yyyy} / ${mm} / ${dd}`;
+      y += lh;
+      ctx.fillStyle = '#e5e7eb';
+      ctx.fillText('今天日期：' + dateText, leftX, y);
+
+      // 再接再厲標語
+      const badgeY = h * 0.16;
+      const badgeW = w * 0.46;
+      const badgeH = 40;
+      const badgeX = (w - badgeW) / 2;
+
+      ctx.save();
+      const grad = ctx.createLinearGradient(badgeX, badgeY, badgeX + badgeW, badgeY + badgeH);
+      grad.addColorStop(0, '#34d399');
+      grad.addColorStop(1, '#4ade80');
+      ctx.fillStyle = grad;
+      ctx.strokeStyle = 'rgba(15,23,42,0.7)';
+      ctx.lineWidth = 2;
+      roundRectPath(ctx, badgeX, badgeY, badgeW, badgeH, 999);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#022c22';
+      ctx.font = '700 20px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('再接再厲', w / 2, badgeY + badgeH / 2 + 7);
+      ctx.restore();
+
+      // 網址置中最下方
+      ctx.textAlign = 'center';
+      ctx.font = '500 16px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = '#9ca3af';
+      ctx.fillText('https://zoxlu.github.io/idiom-wordle-game', w / 2, h - 40);
+    }
+
+    function roundRectPath(ctx, x, y, w, h, r) {
+      const radius = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + w - radius, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+      ctx.lineTo(x + w, y + h - radius);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+      ctx.lineTo(x + radius, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    async function drawCertificate() {
       if (!certificateCanvas) return;
       const ctx = certificateCanvas.getContext('2d');
       const w = certificateCanvas.width;
@@ -1040,94 +1194,89 @@
 
       ctx.clearRect(0, 0, w, h);
 
-      // 背景：使用遊戲盤面色系做抽象背景
-      const bgGradient = ctx.createLinearGradient(0, 0, 0, h);
-      bgGradient.addColorStop(0, '#020617');
-      bgGradient.addColorStop(0.4, '#0f172a');
-      bgGradient.addColorStop(1, '#020617');
-      ctx.fillStyle = bgGradient;
-      ctx.fillRect(0, 0, w, h);
-
-      // 模擬一塊微透亮的盤面區塊
-      const boardX = 60;
-      const boardY = 80;
-      const boardW = w - 120;
-      const boardH = 260;
-      ctx.fillStyle = 'rgba(15,23,42,0.9)';
-      ctx.strokeStyle = '#1f2937';
-      ctx.lineWidth = 2;
-      ctx.roundRect(boardX, boardY, boardW, boardH, 20);
-      ctx.fill();
-      ctx.stroke();
-
-      // 畫 4x4 tile 作為背景圖樣
-      const tileSize = 56;
-      const gap = 8;
-      const startX = boardX + (boardW - (tileSize * 4 + gap * 3)) / 2;
-      const startY = boardY + (boardH - (tileSize * 4 + gap * 3)) / 2;
-      const tileColors = ['#16a34a', '#eab308', '#4b5563'];
-
-      for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
-          const x = startX + c * (tileSize + gap);
-          const y = startY + r * (tileSize + gap);
-          const color = tileColors[(r * 4 + c) % tileColors.length];
-          ctx.fillStyle = color;
-          ctx.strokeStyle = '#020617';
-          ctx.lineWidth = 2;
-          ctx.roundRect(x, y, tileSize, tileSize, 10);
-          ctx.fill();
-          ctx.stroke();
+      const img = await ensureCertificateBgLoaded();
+      if (img) {
+        // 背景圖等比例覆蓋
+        const imgRatio = img.width / img.height;
+        const canvasRatio = w / h;
+        let drawW, drawH, offsetX, offsetY;
+        if (imgRatio > canvasRatio) {
+          drawH = h;
+          drawW = imgRatio * drawH;
+          offsetX = (w - drawW) / 2;
+          offsetY = 0;
+        } else {
+          drawW = w;
+          drawH = drawW / imgRatio;
+          offsetX = 0;
+          offsetY = (h - drawH) / 2;
         }
+        ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+
+        // 暗化 + 聚焦
+        const gradient = ctx.createRadialGradient(
+          w / 2,
+          h * 0.32,
+          h * 0.15,
+          w / 2,
+          h * 0.35,
+          h * 0.7
+        );
+        gradient.addColorStop(0, 'rgba(0,0,0,0.35)');
+        gradient.addColorStop(1, 'rgba(0,0,0,0.8)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, w, h);
+      } else {
+        // 後備純色背景
+        const bgGradient = ctx.createLinearGradient(0, 0, 0, h);
+        bgGradient.addColorStop(0, '#020617');
+        bgGradient.addColorStop(0.4, '#0f172a');
+        bgGradient.addColorStop(1, '#020617');
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, w, h);
       }
 
-      // 標題
-      ctx.fillStyle = '#f97316';
-      ctx.font = 'bold 32px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('成語 WORDLE 證書', w / 2, boardY + boardH + 60);
+      // 中間偏上文字區白色卡片
+      const cardW = w * 0.74;
+      const cardH = h * 0.40;
+      const cardX = (w - cardW) / 2;
+      const cardY = h * 0.22;
 
-      // 分隔線
-      ctx.strokeStyle = '#4b5563';
+      ctx.save();
+      ctx.shadowColor = 'rgba(15,23,42,0.85)';
+      ctx.shadowBlur = 24;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 18;
+      ctx.fillStyle = 'rgba(15,23,42,0.88)';
+      ctx.strokeStyle = 'rgba(148,163,184,0.5)';
+      ctx.lineWidth = 2;
+      roundRectPath(ctx, cardX, cardY, cardW, cardH, 24);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      // 內層淡邊
+      ctx.save();
+      ctx.strokeStyle = 'rgba(248,250,252,0.06)';
       ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(80, boardY + boardH + 80);
-      ctx.lineTo(w - 80, boardY + boardH + 80);
+      roundRectPath(ctx, cardX + 10, cardY + 9, cardW - 20, cardH - 18, 18);
       ctx.stroke();
+      ctx.restore();
 
-      const ability = getAbilityLabelByLevelIndex(currentLevelIndex);
-      const percent = totalAttempts ? Math.round((totalQuestions / totalAttempts) * 100) : 0;
-      const durationMs = gameStartTime && gameEndTime ? (gameEndTime - gameStartTime) : 0;
-
-      ctx.fillStyle = '#e5e7eb';
-      ctx.font = '18px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-      ctx.textAlign = 'left';
-
-      const baseY = boardY + boardH + 115;
-      const lineH = 28;
-      ctx.fillText('成語能力：' + ability, 80, baseY);
-      ctx.fillText('答對題數：' + totalQuestions + ' 題', 80, baseY + lineH);
-      ctx.fillText('答題正確率：' + percent + '%', 80, baseY + lineH * 2);
-      ctx.fillText('總共花費時間：' + formatDuration(durationMs), 80, baseY + lineH * 3);
-
-      // 裝飾圈
-      ctx.strokeStyle = 'rgba(248,113,22,0.7)';
-      ctx.lineWidth = 4;
+      // 在卡片上畫文字資訊
+      ctx.save();
       ctx.beginPath();
-      ctx.arc(w - 120, baseY + lineH * 1.5, 46, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.fillStyle = '#22c55e';
-      ctx.font = 'bold 20px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('CLEAR', w - 120, baseY + lineH * 1.5 + 8);
+      roundRectPath(ctx, cardX, cardY, cardW, cardH, 24);
+      ctx.clip();
+      drawCertificateTextLayer(ctx, w, h);
+      ctx.restore();
 
       certificateWrapperEl.style.display = 'block';
     }
 
     async function shareCertificate() {
       try {
-        drawCertificate();
+        await drawCertificate();
         if (!certificateCanvas) return;
 
         const dataUrl = certificateCanvas.toDataURL('image/png');
@@ -1156,29 +1305,6 @@
       }
     }
 
-    function showCenterMessage() {
-      centerMessageEl.classList.add('show');
-    }
-
-    function hideCenterMessage() {
-      centerMessageEl.classList.remove('show');
-    }
-
-    function enterNextQuestionMode() {
-      waitingForClickToContinue = true;
-      setInputEnabled(false);
-      showCenterMessage();
-      btnSubmit.textContent = '下一題';
-    }
-
-    function exitNextQuestionMode() {
-      waitingForClickToContinue = false;
-      hideCenterMessage();
-      setInputEnabled(true);
-      btnSubmit.textContent = '送出答案';
-      promotionMessageEl.textContent = '';
-    }
-
     function handleCorrectAnswer() {
       levelCorrectCount++;
       solvedIdioms.push(answer);
@@ -1195,10 +1321,13 @@
         return;
       }
 
-      if (levelCorrectCount >= 5) {
+        if (levelCorrectCount >= 5) {
         currentLevelIndex++;
         levelCorrectCount = 0;
-        promotionMessageEl.textContent = `恭喜你升級至「${LEVELS[currentLevelIndex].name}」！`;
+        const newLevelName = LEVELS[currentLevelIndex].name;
+        //promotionMessageEl.innerHTML = '<span class="promotion-message-line1">恭喜你升級至：</span><span class="promotion-message-line2">' + newLevelName + '</span>';
+        promotionMessageTopLevelEl.textContent = newLevelName;
+        promotionMessageTopEl.style.display = 'block';
       }
 
       updateLevelUI();
@@ -1259,6 +1388,8 @@
       buildCharPool();
       updateAttemptsText();
       btnSubmit.disabled = false;
+      //remove promotmessage 
+      promotionMessageTopEl.style.display = 'none';        
     }
 
     function restartGame() {
@@ -1271,6 +1402,7 @@
       gameEndTime = null;
       lastSolvedBoardSnapshot = null;
       promotionMessageEl.textContent = '';
+      promotionMessageTopEl.style.display = 'none';
       closeEndOverlay();
       updateLevelUI();
       exitNextQuestionMode();
