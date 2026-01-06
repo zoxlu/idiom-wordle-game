@@ -588,6 +588,76 @@
   </style>
 </head>
 <body>
+  
+  <!-- ============================= -->
+  <!-- Canvas Certificate Generator -->
+  <!-- ============================= -->
+
+   <!--<canvas id="certificateCanvas" style="display:none"></canvas>-->
+
+  <script>
+    function generateCertificate(result) {
+      const canvas = document.getElementById('certificate-canvas');
+      const ctx = canvas.getContext('2d');
+
+      const img = new Image();
+      img.src = './data/certificate_template.jpg';
+
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        //ctx.fillStyle = '#f5f1e8';
+        //ctx.font = '36px serif';
+        ctx.fillStyle = '#E8D8B0';          
+        //ctx.font ='32px sans-serif';
+        ctx.font = '32px "Noto Serif TC", sans-serif';          
+        ctx.textAlign = 'left';
+        //ctx.textBaseline = 'middle';  
+
+
+          
+
+        // === 精準座標（依照 template 實測） ===
+        ctx.fillText(result.level, 270, 650);           // 等級
+        ctx.fillText(result.correctCount, 270, 720);   // 答對題目
+        ctx.fillText(result.accuracy + '%', 650,720); // 正確率
+        ctx.fillText(result.time, 290, 800);           // 總時間
+        ctx.fillText(result.date, 560, 800);           // 日期
+
+
+        document.getElementById('certificate-wrapper').style.display = 'block';
+        // 下載
+        //const link = document.createElement('a');
+        //link.download = 'idiom_wordle_certificate.jpg';
+        //link.href = canvas.toDataURL('image/jpg');
+        //link.click();
+        window.__certificateReady = true;          
+      };
+        
+      if (!window.__certificateReady) {
+        showToast('證書尚未完成，請稍候');
+        return;
+        }  
+    }
+
+    // === 遊戲結束時呼叫（接原本邏輯） ===
+   /*   
+    function onGameFinished() {
+      const gameResult = {
+        level: currentLevel || '普羅大眾',
+        correctCount: `${correctAnswers} 題`,
+        accuracy: Math.round((correctAnswers / totalQuestions) * 100),
+        time: `${Math.floor(totalTimeSeconds / 60)} 分 ${totalTimeSeconds % 60} 秒`,
+        date: new Date().toLocaleDateString('zh-TW')
+      };
+
+      generateCertificate(gameResult);
+    }     
+    */
+  </script>
+    
   <div class="toast" id="toast"></div>
 
   <!-- 遊戲結束視窗 -->
@@ -1067,11 +1137,28 @@
         <div>答題正確率：${percent}%</div>
         <div>總答題時間：${formatDuration(durationMs)}</div>
       `;
-      endStatsEl.innerHTML = statsHtml;
-      drawCertificate();
-      openEndOverlay(title, body);
+        
+      // --- certificate related --- 
+        
+      const gameResult = {
+        level: ability,
+        correctCount: `${totalQuestions} 題`,
+        accuracy:percent,
+        //time: `${Math.floor(totalTimeSeconds / 60)} 分 ${totalTimeSeconds % 60} 秒`,
+        //time: durationMs,
+        time: `${Math.floor(durationMs / 60000)} 分 ${ Math.floor(durationMs/1000) % 60} 秒`,  
+        date: new Date().toLocaleDateString('zh-TW')
+      };
+      
+      generateCertificate(gameResult);
+      // --- certificate related ---  
+        
+      //endStatsEl.innerHTML = statsHtml;
+      //drawCertificate();
+      //openEndOverlay(title, body);
+      openEndOverlay(title);  
     }
-
+/*
     // 儲存最後一題成功時的盤面，作為證書背景
     function snapshotBoard() {
       try {
@@ -1085,7 +1172,8 @@
         console.warn('snapshotBoard failed', e);
       }
     }
-
+*/    
+/*
     function ensureCertificateBgLoaded() {
       return new Promise(resolve => {
         if (certificateBgImage && certificateBgImage.complete) {
@@ -1103,7 +1191,8 @@
         }
       });
     }
-
+*/    
+/*
     function drawCertificateTextLayer(ctx, w, h) {
       const percent = totalAttempts ? Math.round((totalQuestions / totalAttempts) * 100) : 0;
       const durationMs = gameStartTime && gameEndTime ? (gameEndTime - gameStartTime) : 0;
@@ -1170,7 +1259,7 @@
       ctx.fillStyle = '#9ca3af';
       ctx.fillText('https://zoxlu.github.io/idiom-wordle-game', w / 2, h - 40);
     }
-
+*/
     function roundRectPath(ctx, x, y, w, h, r) {
       const radius = Math.min(r, w / 2, h / 2);
       ctx.beginPath();
@@ -1185,7 +1274,7 @@
       ctx.quadraticCurveTo(x, y, x + radius, y);
       ctx.closePath();
     }
-
+/*
     async function drawCertificate() {
       if (!certificateCanvas) return;
       const ctx = certificateCanvas.getContext('2d');
@@ -1273,16 +1362,38 @@
 
       certificateWrapperEl.style.display = 'block';
     }
-
+*/      
+      
+    function downloadCertificate() {
+      const canvas = document.getElementById('certificate-canvas');
+    
+      if (!canvas) {
+        alert('證書尚未產生');
+        return;
+      }
+    
+      const dataUrl = canvas.toDataURL('image/jpg');
+    
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = '成語Wordle證書.jpg';
+    
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+/*
     async function shareCertificate() {
       try {
-        await drawCertificate();
-        if (!certificateCanvas) return;
-
-        const dataUrl = certificateCanvas.toDataURL('image/png');
+        //await generateCertificate(gameResult);         
+        //await drawCertificate();
+        //if (!certificateCanvas) return;
+          
+ 
+  
         const res = await fetch(dataUrl);
         const blob = await res.blob();
-        const file = new File([blob], 'chengyu-wordle-certificate.png', { type: 'image/png' });
+        const file = new File([blob], 'chengyu-wordle-certificate.jpg', { type: 'image/jpg' });
 
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
@@ -1293,17 +1404,20 @@
         } else {
           const link = document.createElement('a');
           link.href = dataUrl;
-          link.download = 'chengyu-wordle-certificate.png';
+          link.download = 'chengyu-wordle-certificate.jpg';
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
           showToast('已產生證書圖片，可儲存到相簿或分享。', 2000);
-        }
+
+        
       } catch (e) {
         console.error(e);
         showToast('分享失敗，請稍後再試。', 2000);
       }
+     
     }
+*/      
 
     function handleCorrectAnswer() {
       levelCorrectCount++;
@@ -1437,6 +1551,7 @@
         orientationWarningEl.classList.remove('show');
       }
     }
+      
 
     btnSubmit.addEventListener('click', submitRow);
     btnUndo.addEventListener('click', undoChar);
@@ -1444,8 +1559,9 @@
       restartGame();
       hideStartOverlay();
     });
-    btnShare.addEventListener('click', shareCertificate);
-
+    //btnShare.addEventListener('click', shareCertificate);
+    btnShare.addEventListener('click', downloadCertificate);
+      
     btnStartGame.addEventListener('click', () => {
       hideStartOverlay();
       if (!idiomData) {
@@ -1484,6 +1600,8 @@
     updateLevelUI();
     loadIdiomData();
     handleOrientationChange();
+
+       
   </script>
 </body>
 </html>
