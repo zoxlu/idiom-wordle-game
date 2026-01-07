@@ -28,7 +28,19 @@
 
     html, body {
       height: 100%;
+      touch-action: manipulation;
+      webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
     }
+
+    button, .key {
+      touch-action: manipulation;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }    
 
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -596,6 +608,12 @@
   <!-- <canvas id="certificateCanvas" style="display:none"></canvas> -->
 
    <script>
+    function haptic(ms = 20) {
+      if (navigator.vibrate) {
+        navigator.vibrate(ms);
+      }
+    }
+
     function generateCertificate(result) {
       const canvas = document.getElementById('certificate-canvas');
       const ctx = canvas.getContext('2d');
@@ -625,13 +643,9 @@
         ctx.fillText(result.date, 560, 800);           // 日期
 
 
-        //document.getElementById('certificate-wrapper').style.display = 'block';
-        document.getElementById('certificate-wrapper').style.display = 'none';
-        // 下載
-        //const link = document.createElement('a');
-        //link.download = 'idiom_wordle_certificate.jpg';
-        //link.href = canvas.toDataURL('image/jpg');
-        //link.click();
+        document.getElementById('certificate-wrapper').style.display = 'block';
+        //document.getElementById('certificate-wrapper').style.display = 'none';
+
         window.__certificateReady = true;          
       };
         
@@ -657,7 +671,7 @@
       <div style="height: 8px;"></div>
       <div class="modal-actions">
         <button class="btn btn-ghost btn-wide btn-icon-left" id="btn-share">
-          <span style="font-size:14px;">⇪</span>
+          <span style="font-size:18px;">⇪</span>
           <span>分享</span>
         </button>
         <button class="btn btn-primary btn-wide" id="btn-retry">再玩一次</button>
@@ -1020,6 +1034,7 @@
       tile.classList.add('filled');
       boardState[currentRow][currentCol] = ch;
       currentCol++;
+      haptic(10);
     }
 
     function getRowTiles(row) {
@@ -1115,7 +1130,7 @@
       const percent = totalAttempts ? Math.round((totalQuestions / totalAttempts) * 100) : 0;
       const ability = getAbilityLabelByLevelIndex(currentLevelIndex);
 
-      const title = success ? '恭喜破關，你是成語達人' : '答案錯誤，遊戲結束';
+      const title = success ? '恭喜破關，你是成語達人' : '很遺憾答案錯誤，遊戲結束';
       const body = '成語能力：' + ability;
       const statsHtml = `
         <div>答對題目：${totalQuestions} 題</div>
@@ -1134,248 +1149,16 @@
         time: `${Math.floor(durationMs / 60000)} 分 ${ Math.floor(durationMs/1000) % 60} 秒`,  
         date: new Date().toLocaleDateString('zh-TW')
       };
-      
+      haptic(60);
       generateCertificate(gameResult);
       // --- certificate related ---  
         
-      endStatsEl.innerHTML = statsHtml;
+      //endStatsEl.innerHTML = statsHtml;
       //drawCertificate();
-      openEndOverlay(title, body);
+      //openEndOverlay(title, body);
+      openEndOverlay(title);
     }
 
-    // 儲存最後一題成功時的盤面，作為證書背景
-    function snapshotBoard() {
-      try {
-        const rect = boardWrapperEl.getBoundingClientRect();
-        lastSolvedBoardSnapshot = {
-          width: rect.width,
-          height: rect.height,
-          bgColor: getComputedStyle(boardWrapperEl).backgroundColor
-        };
-      } catch (e) {
-        console.warn('snapshotBoard failed', e);
-      }
-    }
-
-    function ensureCertificateBgLoaded() {
-      return new Promise(resolve => {
-        if (certificateBgImage && certificateBgImage.complete) {
-          resolve(certificateBgImage);
-          return;
-        }
-        if (!certificateBgImage) {
-          certificateBgImage = new Image();
-          certificateBgImage.src = './data/certificate_bg.png';
-          certificateBgImage.onload = () => resolve(certificateBgImage);
-          certificateBgImage.onerror = () => resolve(null);
-        } else {
-          certificateBgImage.onload = () => resolve(certificateBgImage);
-          certificateBgImage.onerror = () => resolve(null);
-        }
-      });
-    }
-
-    function drawCertificateTextLayer(ctx, w, h) {
-      const percent = totalAttempts ? Math.round((totalQuestions / totalAttempts) * 100) : 0;
-      const durationMs = gameStartTime && gameEndTime ? (gameEndTime - gameStartTime) : 0;
-      const ability = getAbilityLabelByLevelIndex(currentLevelIndex);
-
-      // 主標題
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '700 34px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('成語 WORDLE 證書', w / 2, h * 0.23);
-
-      // 等級與數據
-      ctx.textAlign = 'left';
-      const leftX = w * 0.18;
-      let y = h * 0.30;
-      const lh = 34;
-
-      ctx.font = '600 20px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-      ctx.fillStyle = '#bef264';
-      ctx.fillText('等級：' + ability, leftX, y);
-      y += lh;
-      ctx.fillStyle = '#fde68a';
-      ctx.fillText('答對題目：' + totalQuestions + ' 題', leftX, y);
-      y += lh;
-      ctx.fillText('答題正確率：' + percent + '%', leftX, y);
-      y += lh;
-      ctx.fillText('總答題時間：' + formatDuration(durationMs), leftX, y);
-
-      // 日期
-      const date = new Date();
-      const yyyy = date.getFullYear();
-      const mm = String(date.getMonth() + 1).padStart(2, '0');
-      const dd = String(date.getDate()).padStart(2, '0');
-      const dateText = `${yyyy} / ${mm} / ${dd}`;
-      y += lh;
-      ctx.fillStyle = '#e5e7eb';
-      ctx.fillText('今天日期：' + dateText, leftX, y);
-
-      // 再接再厲標語
-      const badgeY = h * 0.16;
-      const badgeW = w * 0.46;
-      const badgeH = 40;
-      const badgeX = (w - badgeW) / 2;
-
-      ctx.save();
-      const grad = ctx.createLinearGradient(badgeX, badgeY, badgeX + badgeW, badgeY + badgeH);
-      grad.addColorStop(0, '#34d399');
-      grad.addColorStop(1, '#4ade80');
-      ctx.fillStyle = grad;
-      ctx.strokeStyle = 'rgba(15,23,42,0.7)';
-      ctx.lineWidth = 2;
-      roundRectPath(ctx, badgeX, badgeY, badgeW, badgeH, 999);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#022c22';
-      ctx.font = '700 20px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('再接再厲', w / 2, badgeY + badgeH / 2 + 7);
-      ctx.restore();
-
-      // 網址置中最下方
-      ctx.textAlign = 'center';
-      ctx.font = '500 16px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-      ctx.fillStyle = '#9ca3af';
-      ctx.fillText('https://zoxlu.github.io/idiom-wordle-game', w / 2, h - 40);
-    }
-
-    function roundRectPath(ctx, x, y, w, h, r) {
-      const radius = Math.min(r, w / 2, h / 2);
-      ctx.beginPath();
-      ctx.moveTo(x + radius, y);
-      ctx.lineTo(x + w - radius, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
-      ctx.lineTo(x + w, y + h - radius);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
-      ctx.lineTo(x + radius, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
-      ctx.lineTo(x, y + radius);
-      ctx.quadraticCurveTo(x, y, x + radius, y);
-      ctx.closePath();
-    }
-
-    async function drawCertificate() {
-      if (!certificateCanvas) return;
-      const ctx = certificateCanvas.getContext('2d');
-      const w = certificateCanvas.width;
-      const h = certificateCanvas.height;//certificateCanvas
-
-      ctx.clearRect(0, 0, w, h);
-
-      const img = await ensureCertificateBgLoaded();
-      if (img) {
-        // 背景圖等比例覆蓋
-        const imgRatio = img.width / img.height;
-        const canvasRatio = w / h;
-        let drawW, drawH, offsetX, offsetY;
-        if (imgRatio > canvasRatio) {
-          drawH = h;
-          drawW = imgRatio * drawH;
-          offsetX = (w - drawW) / 2;
-          offsetY = 0;
-        } else {
-          drawW = w;
-          drawH = drawW / imgRatio;
-          offsetX = 0;
-          offsetY = (h - drawH) / 2;
-        }
-        ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
-
-        // 暗化 + 聚焦
-        const gradient = ctx.createRadialGradient(
-          w / 2,
-          h * 0.32,
-          h * 0.15,
-          w / 2,
-          h * 0.35,
-          h * 0.7
-        );
-        gradient.addColorStop(0, 'rgba(0,0,0,0.35)');
-        gradient.addColorStop(1, 'rgba(0,0,0,0.8)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, w, h);
-      } else {
-        // 後備純色背景
-        const bgGradient = ctx.createLinearGradient(0, 0, 0, h);
-        bgGradient.addColorStop(0, '#020617');
-        bgGradient.addColorStop(0.4, '#0f172a');
-        bgGradient.addColorStop(1, '#020617');
-        ctx.fillStyle = bgGradient;
-        ctx.fillRect(0, 0, w, h);
-      }
-
-      // 中間偏上文字區白色卡片
-      const cardW = w * 0.74;
-      const cardH = h * 0.40;
-      const cardX = (w - cardW) / 2;
-      const cardY = h * 0.22;
-
-      ctx.save();
-      ctx.shadowColor = 'rgba(15,23,42,0.85)';
-      ctx.shadowBlur = 24;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 18;
-      ctx.fillStyle = 'rgba(15,23,42,0.88)';
-      ctx.strokeStyle = 'rgba(148,163,184,0.5)';
-      ctx.lineWidth = 2;
-      roundRectPath(ctx, cardX, cardY, cardW, cardH, 24);
-      ctx.fill();
-      ctx.stroke();
-      ctx.restore();
-
-      // 內層淡邊
-      ctx.save();
-      ctx.strokeStyle = 'rgba(248,250,252,0.06)';
-      ctx.lineWidth = 1;
-      roundRectPath(ctx, cardX + 10, cardY + 9, cardW - 20, cardH - 18, 18);
-      ctx.stroke();
-      ctx.restore();
-
-      // 在卡片上畫文字資訊
-      ctx.save();
-      ctx.beginPath();
-      roundRectPath(ctx, cardX, cardY, cardW, cardH, 24);
-      ctx.clip();
-      drawCertificateTextLayer(ctx, w, h);
-      ctx.restore();
-
-      certificateWrapperEl.style.display = 'block';
-    }
-
-    async function shareCertificate() {
-      try {
-        //await generateCertificate(gameResult);         
-        //await drawCertificate();
-        //if (!certificateCanvas) return;
-
-        const dataUrl = certificateCanvas.toDataURL('image/jpg');
-        const res = await fetch(dataUrl);
-        const blob = await res.blob();
-        const file = new File([blob], 'chengyu-wordle-certificate.jpg', { type: 'image/jpg' });
-
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            title: '成語 Wordle 證書',
-            text: '來看看我的成語 Wordle 成績！',
-            files: [file]
-          });
-        } else {
-          const link = document.createElement('a');
-          link.href = dataUrl;
-          link.download = 'chengyu-wordle-certificate.jpg';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          showToast('已產生證書圖片，可儲存到相簿或分享。', 2000);
-        }
-      } catch (e) {
-        console.error(e);
-        showToast('分享失敗，請稍後再試。', 2000);
-      }
-    }
 
    async function downloadCertificate() {
     
@@ -1429,7 +1212,7 @@
       if (finishedAllLevels) {
         updateLevelUI();
         statusTextEl.textContent = '';
-        snapshotBoard();
+        //snapshotBoard();
         handleGameEnd(true);
         btnSubmit.disabled = true;
         setInputEnabled(false);
@@ -1443,11 +1226,16 @@
         //promotionMessageEl.innerHTML = '<span class="promotion-message-line1">恭喜你升級至：</span><span class="promotion-message-line2">' + newLevelName + '</span>';
         promotionMessageTopLevelEl.textContent = newLevelName;
         promotionMessageTopEl.style.display = 'block';
+        haptic(40);
       }
+      else {
+        haptic(20);
+      }
+
 
       updateLevelUI();
       statusTextEl.textContent = '';
-      snapshotBoard();
+      //snapshotBoard();
       enterNextQuestionMode();
     }
 
