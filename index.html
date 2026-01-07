@@ -593,9 +593,9 @@
   <!-- Canvas Certificate Generator -->
   <!-- ============================= -->
 
-   <!--<canvas id="certificateCanvas" style="display:none"></canvas>-->
+  <!-- <canvas id="certificateCanvas" style="display:none"></canvas> -->
 
-  <script>
+   <script>
     function generateCertificate(result) {
       const canvas = document.getElementById('certificate-canvas');
       const ctx = canvas.getContext('2d');
@@ -617,8 +617,6 @@
         //ctx.textBaseline = 'middle';  
 
 
-          
-
         // === 精準座標（依照 template 實測） ===
         ctx.fillText(result.level, 270, 650);           // 等級
         ctx.fillText(result.correctCount, 270, 720);   // 答對題目
@@ -627,7 +625,8 @@
         ctx.fillText(result.date, 560, 800);           // 日期
 
 
-        document.getElementById('certificate-wrapper').style.display = 'block';
+        //document.getElementById('certificate-wrapper').style.display = 'block';
+        document.getElementById('certificate-wrapper').style.display = 'none';
         // 下載
         //const link = document.createElement('a');
         //link.download = 'idiom_wordle_certificate.jpg';
@@ -639,25 +638,11 @@
       if (!window.__certificateReady) {
         showToast('證書尚未完成，請稍候');
         return;
-        }  
+      }  
     }
-
-    // === 遊戲結束時呼叫（接原本邏輯） ===
-   /*   
-    function onGameFinished() {
-      const gameResult = {
-        level: currentLevel || '普羅大眾',
-        correctCount: `${correctAnswers} 題`,
-        accuracy: Math.round((correctAnswers / totalQuestions) * 100),
-        time: `${Math.floor(totalTimeSeconds / 60)} 分 ${totalTimeSeconds % 60} 秒`,
-        date: new Date().toLocaleDateString('zh-TW')
-      };
-
-      generateCertificate(gameResult);
-    }     
-    */
   </script>
-    
+
+
   <div class="toast" id="toast"></div>
 
   <!-- 遊戲結束視窗 -->
@@ -1153,12 +1138,11 @@
       generateCertificate(gameResult);
       // --- certificate related ---  
         
-      //endStatsEl.innerHTML = statsHtml;
+      endStatsEl.innerHTML = statsHtml;
       //drawCertificate();
-      //openEndOverlay(title, body);
-      openEndOverlay(title);  
+      openEndOverlay(title, body);
     }
-/*
+
     // 儲存最後一題成功時的盤面，作為證書背景
     function snapshotBoard() {
       try {
@@ -1172,8 +1156,7 @@
         console.warn('snapshotBoard failed', e);
       }
     }
-*/    
-/*
+
     function ensureCertificateBgLoaded() {
       return new Promise(resolve => {
         if (certificateBgImage && certificateBgImage.complete) {
@@ -1191,8 +1174,7 @@
         }
       });
     }
-*/    
-/*
+
     function drawCertificateTextLayer(ctx, w, h) {
       const percent = totalAttempts ? Math.round((totalQuestions / totalAttempts) * 100) : 0;
       const durationMs = gameStartTime && gameEndTime ? (gameEndTime - gameStartTime) : 0;
@@ -1259,7 +1241,7 @@
       ctx.fillStyle = '#9ca3af';
       ctx.fillText('https://zoxlu.github.io/idiom-wordle-game', w / 2, h - 40);
     }
-*/
+
     function roundRectPath(ctx, x, y, w, h, r) {
       const radius = Math.min(r, w / 2, h / 2);
       ctx.beginPath();
@@ -1274,12 +1256,12 @@
       ctx.quadraticCurveTo(x, y, x + radius, y);
       ctx.closePath();
     }
-/*
+
     async function drawCertificate() {
       if (!certificateCanvas) return;
       const ctx = certificateCanvas.getContext('2d');
       const w = certificateCanvas.width;
-      const h = certificateCanvas.height;
+      const h = certificateCanvas.height;//certificateCanvas
 
       ctx.clearRect(0, 0, w, h);
 
@@ -1362,35 +1344,14 @@
 
       certificateWrapperEl.style.display = 'block';
     }
-*/      
-      
-    function downloadCertificate() {
-      const canvas = document.getElementById('certificate-canvas');
-    
-      if (!canvas) {
-        alert('證書尚未產生');
-        return;
-      }
-    
-      const dataUrl = canvas.toDataURL('image/jpg');
-    
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = '成語Wordle證書.jpg';
-    
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-/*
+
     async function shareCertificate() {
       try {
         //await generateCertificate(gameResult);         
         //await drawCertificate();
         //if (!certificateCanvas) return;
-          
- 
-  
+
+        const dataUrl = certificateCanvas.toDataURL('image/jpg');
         const res = await fetch(dataUrl);
         const blob = await res.blob();
         const file = new File([blob], 'chengyu-wordle-certificate.jpg', { type: 'image/jpg' });
@@ -1409,15 +1370,55 @@
           link.click();
           document.body.removeChild(link);
           showToast('已產生證書圖片，可儲存到相簿或分享。', 2000);
-
-        
+        }
       } catch (e) {
         console.error(e);
         showToast('分享失敗，請稍後再試。', 2000);
       }
-     
     }
-*/      
+
+   async function downloadCertificate() {
+    
+      const canvas = document.getElementById('certificate-canvas');
+    
+      if (!canvas) {
+        alert('證書尚未產生');
+        return;
+      }
+
+      try {    
+        const dataUrl = canvas.toDataURL('image/jpg');
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], '成語Wordle證書.jpg', { type: 'image/jpg' });
+
+        
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            
+            await navigator.share({
+              title: '成語 Wordle 證書',
+              text: '來看看我的成語 Wordle 成績！',
+              files: [file]
+            });
+            
+          } else {    
+            
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = '成語Wordle證書.jpg';
+          
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('已產生證書圖片，可儲存到相簿或分享。', 2000);
+        }
+      } catch (e) {
+        console.error(e);
+        showToast('分享失敗，請稍後再試。', 2000);
+      }  
+    }
+ 
+
 
     function handleCorrectAnswer() {
       levelCorrectCount++;
@@ -1561,7 +1562,7 @@
     });
     //btnShare.addEventListener('click', shareCertificate);
     btnShare.addEventListener('click', downloadCertificate);
-      
+
     btnStartGame.addEventListener('click', () => {
       hideStartOverlay();
       if (!idiomData) {
