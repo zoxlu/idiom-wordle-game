@@ -1,8 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-<head>
+<head> 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7G8D7MTR5E"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-7G8D7MTR5E');
+  </script>   
   <title>成語猜謎 </title>
   <style>
     :root {
@@ -1157,6 +1167,15 @@
       //drawCertificate();
       //openEndOverlay(title, body);
       openEndOverlay(title);
+
+      gtag('event', 'game_complete', {
+        result: success,           // win / lose
+        level: ability,
+        correctCount:totalQuestions,
+        accuracy:percent,
+        time: Math.floor(durationMs / 60000)
+      });
+
     }
 
 
@@ -1183,7 +1202,9 @@
               text: '來看看我的成語 Wordle 成績！',
               files: [file]
             });
-            
+            gtag('event', 'share_certificate', {
+               game: 'idiom_wordle'
+            });
           } else {    
             
             const link = document.createElement('a');
@@ -1359,6 +1380,11 @@
       }
       gameStartTime = Date.now();
       newRound();
+
+      gtag('event', 'start_game', {
+          game: 'idiom_wordle'
+        });
+
     });
 
     btnStartRules.addEventListener('click', () => {
